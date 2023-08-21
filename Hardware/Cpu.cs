@@ -355,7 +355,7 @@ public partial class Cpu
         Status = CpuFlags.Unused | CpuFlags.InterruptDisable;
         Cycles = 8;
         
-        Logger.Start("..\\..\\..\\test.log");
+        Logger.Start("..\\..\\..\\test1.log");
     }
 
     public void Cycle()
@@ -424,8 +424,8 @@ public partial class Cpu
         {
             throw new Exception("Unhandled opcode: 0x" + opcode.ToString("X2"));
         }
-        
-        Logger.Op(entry.Name);
+
+        Logger.Op(entry.Name, entry.Mode);
 
         (ushort value, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         
@@ -459,6 +459,7 @@ public partial class Cpu
                 zeroPageAddress = (byte) (ReadNextProgramByte() + Y);
                 value = Read(zeroPageAddress);
                 return (value, zeroPageAddress, 0);
+            case AddressMode.ACC:
             case AddressMode.IMP:
                 return (0,0,0);
             case AddressMode.REL:

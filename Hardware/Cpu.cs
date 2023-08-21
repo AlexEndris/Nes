@@ -372,7 +372,8 @@ public partial class Cpu
         //Unused = true;
         Logger.StartLine(cycleCount);
         Logger.State(this);
-        Cycles += Execute();
+        var cyclesToAdd = Execute();
+        Cycles += cyclesToAdd;
         Logger.EndLine();
     }
 

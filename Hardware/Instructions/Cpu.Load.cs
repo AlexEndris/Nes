@@ -14,20 +14,20 @@ public partial class Cpu
     {
         A = (byte) data;
         SetLoadFlag(A);
-        return 0;
+        return 1;
     }
 
     private byte LDX(ushort data, ushort _)
     {
         X = (byte) data;
         SetLoadFlag(X);
-        return 0;
+        return 1;
     }
 
     private byte LDY(ushort data, ushort _)
     {
         Y = (byte) data;
         SetLoadFlag(Y);
-        return 0;
+        return 1;
     }
 }

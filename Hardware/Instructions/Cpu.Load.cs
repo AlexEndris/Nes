@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -10,161 +12,24 @@ public partial class Cpu
         Zero = value == 0;
     }
 
-    private byte LDAImm()
+    private byte LDA(Func<ushort> fetch, ushort _)
     {
-        A = ReadNextProgramByte();
+        A = (byte) fetch();
         SetLoadFlag(A);
-        return 2;
+        return 1;
     }
 
-    private byte LDAZpg()
+    private byte LDX(Func<ushort> fetch, ushort _)
     {
-        byte address = ReadNextProgramByte();
-        A = Read(address);
-        SetLoadFlag(A);
-        return 3;
-    }
-
-    private byte LDAZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        A = Read(address);
-        SetLoadFlag(A);
-        return 4;
-    }
-
-    private byte LDAAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        A = Read(address);
-        SetLoadFlag(A);
-        return 4;
-    }
-
-    private byte LDAAbsX()
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + X);
-        A = Read(actualAddress);
-        SetLoadFlag(A);
-        return (byte) (Memory.CrossesPageBoundary(baseAddress, actualAddress)
-            ? 5
-            : 4);
-    }
-
-    private byte LDAAbsY()
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + Y);
-        A = Read(actualAddress);
-        SetLoadFlag(A);
-        return (byte) (Memory.CrossesPageBoundary(baseAddress, actualAddress)
-            ? 5
-            : 4);
-    }
-
-    private byte LDAIndX()
-    {
-        byte zeroPageAddress = (byte) (ReadNextProgramByte() + X);
-        ushort actualAddress = Read16BitZpg(zeroPageAddress);
-        A = Read(actualAddress);
-        SetLoadFlag(A);
-        return 6;
-    }
-
-    private byte LDAIndY()
-    {
-        byte zeroPageAddress = ReadNextProgramByte();
-        ushort baseAddress = Read16BitZpg(zeroPageAddress);
-        ushort actualAddress = (ushort) (baseAddress + Y);
-        A = Read(actualAddress);
-        SetLoadFlag(A);
-        return (byte) (Memory.CrossesPageBoundary(baseAddress, actualAddress)
-            ? 5
-            : 4);
-    }
-
-    private byte LDXImm()
-    {
-        X = ReadNextProgramByte();
+        X = (byte) fetch();
         SetLoadFlag(X);
-        return 2;
+        return 1;
     }
 
-    private byte LDXZpg()
+    private byte LDY(Func<ushort> fetch, ushort _)
     {
-        byte address = ReadNextProgramByte();
-        X = Read(address);
-        SetLoadFlag(X);
-        return 3;
-    }
-
-    private byte LDXZpgY()
-    {
-        byte address = (byte) (ReadNextProgramByte() + Y);
-        X = Read(address);
-        SetLoadFlag(X);
-        return 4;
-    }
-
-    private byte LDXAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        X = Read(address);
-        SetLoadFlag(X);
-        return 4;
-    }
-
-    private byte LDXAbsY()
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + Y);
-        X = Read(actualAddress);
-        SetLoadFlag(X);
-        return (byte) (Memory.CrossesPageBoundary(baseAddress, actualAddress)
-            ? 5
-            : 4);
-    }
-
-    private byte LDYImm()
-    {
-        Y = ReadNextProgramByte();
+        Y = (byte) fetch();
         SetLoadFlag(Y);
-        return 2;
-    }
-
-    private byte LDYZpg()
-    {
-        byte address = ReadNextProgramByte();
-        Y = Read(address);
-        SetLoadFlag(Y);
-        return 3;
-    }
-
-    private byte LDYZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        Y = Read(address);
-        SetLoadFlag(Y);
-        return 4;
-    }
-
-    private byte LDYAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        Y = Read(address);
-        SetLoadFlag(Y);
-        return 4;
-    }
-
-    private byte LDYAbsX()
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + X);
-        Y = Read(actualAddress);
-        SetLoadFlag(Y);
-        return (byte) (Memory.CrossesPageBoundary(baseAddress, actualAddress)
-            ? 5
-            : 4);
+        return 1;
     }
 }

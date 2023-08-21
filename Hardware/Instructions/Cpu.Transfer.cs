@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -9,44 +12,44 @@ public partial class Cpu
         Negative = (result & 0x80) > 0;
     }
     
-    private byte TAX()
+    private byte TAX(Func<ushort> _, ushort __)
     {
         X = A;
         SetTransferFlag(X);
-        return 2;
+        return 0;
     }
 
-    private byte TAY()
+    private byte TAY(Func<ushort> _, ushort __)
     {
         Y = A;
         SetTransferFlag(Y);
-        return 2;
+        return 0;
     }
 
-    private byte TSX()
+    private byte TSX(Func<ushort> _, ushort __)
     {
         X = SP;
         SetTransferFlag(X);
-        return 2;
+        return 0;
     }
 
-    private byte TXA()
+    private byte TXA(Func<ushort> _, ushort __)
     {
         A = X;
         SetTransferFlag(A);
-        return 2;
+        return 0;
     }
 
-    private byte TXS()
+    private byte TXS(Func<ushort> _, ushort __)
     {
          SP = X;
-         return 2;
+         return 0;
     }
 
-    private byte TYA()
+    private byte TYA(Func<ushort> _, ushort __)
     {
         A = Y;
         SetTransferFlag(A);
-        return 2;
+        return 0;
     }
 }

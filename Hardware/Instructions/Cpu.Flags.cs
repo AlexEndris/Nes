@@ -1,48 +1,50 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
 {
-    private byte CLC()
+    private byte CLC(Func<ushort> _, ushort __)
     {
         Carry = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLD()
+    private byte CLD(Func<ushort> _, ushort __)
     {
         DecimalMode = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLI()
+    private byte CLI(Func<ushort> _, ushort __)
     {
         InterruptDisable = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLV()
+    private byte CLV(Func<ushort> _, ushort __)
     {
         Overflow = false;
-        return 2;
+        return 0;
     }
 
-    private byte SEC()
+    private byte SEC(Func<ushort> _, ushort __)
     {
         Carry = true;
-        return 2;
+        return 0;
     }
 
-    private byte SED()
+    private byte SED(Func<ushort> _, ushort __)
     {
         DecimalMode = true;
-        return 2;
+        return 0;
     }
 
-    private byte SEI()
+    private byte SEI(Func<ushort> _, ushort __)
     {
         InterruptDisable = true;
-        return 2;
+        return 0;
     }
 }

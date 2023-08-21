@@ -1,17 +1,17 @@
-﻿namespace Hardware;
+﻿using System;
+
+namespace Hardware;
 
 public partial class Cpu
 {
-    private byte DOP()
+    private byte DOP(Func<ushort> _, ushort __)
     {
-        ReadNextProgramByte();
-
-        return 3;
+        return 0;
     }
 
-    private byte AAC()
+    private byte AAC(Func<ushort> fetch, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) fetch();
         A = (byte) (A & value);
 
         Negative = (A & 0x80) > 0;
@@ -21,9 +21,9 @@ public partial class Cpu
         return 2;
     }
 
-    private byte ASR()
+    private byte ASR(Func<ushort> fetch, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) fetch();
         value = (byte) (A & value);
         
         Carry = (value & 0x1) > 0;
@@ -32,12 +32,12 @@ public partial class Cpu
         Negative = (A & 0x80) > 0;
         Zero = A == 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte ARR()
+    private byte ARR(Func<ushort> fetch, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) fetch();
         value = (byte) (A & value);
         A = (byte) ((value >> 1) | (Carry ? 0x80 : 0));
 
@@ -46,33 +46,33 @@ public partial class Cpu
         Carry = (A & 0x40) > 0;
         Overflow = ((Carry ? 0x1 : 0) ^ ((A >> 5) & 0x1)) != 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte ATX()
+    private byte ATX(Func<ushort> fetch, ushort __)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte)fetch();
         A = value;
         X = value;
 
         Zero = A == 0;
         Negative = (A & 0x80) > 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte AXS()
+    private byte AXS(Func<ushort> fetch, ushort __)
     {
-        byte initial = ReadNextProgramByte();
-        byte value = (byte) ((A & X) - initial);
+        byte data = (byte)fetch();
+        byte value = (byte) ((A & X) - data);
 
-        Carry = (A & X) >= initial;
+        Carry = (A & X) >= data;
 
         X = value;
 
         Zero = X == 0;
         Negative = (X & 0x80) > 0;
         
-        return 2;
+        return 0;
     }
 }

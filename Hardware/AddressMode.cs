@@ -13,5 +13,6 @@ public enum AddressMode
     ABY,
     IND,
     INX,
-    INY
+    INY,
+    ACC
 }

@@ -78,6 +78,7 @@ public partial class Cpu
     public byte Cycles { get; private set; }
 
     private Dictionary<byte, (string Name, AddressMode Mode, Func<byte> Func)> opcodeActions;
+    private int cycleCount;
 
     public Cpu(IBus bus)
     {
@@ -165,25 +166,25 @@ public partial class Cpu
             {0xCA, ("DEX", AddressMode.IMP, DEX)},
             {0x88, ("DEY", AddressMode.IMP, DEY)},
 
-            {0x0A, ("ASL", AddressMode.IMP, ASLAcc)},
+            {0x0A, ("ASL", AddressMode.ACC, ASLAcc)},
             {0x06, ("ASL", AddressMode.ZPG, ASLZpg)},
             {0x16, ("ASL", AddressMode.ZPX, ASLZpgX)},
             {0x0E, ("ASL", AddressMode.ABS, ASLAbs)},
             {0x1E, ("ASL", AddressMode.ABX, ASLAbsX)},
 
-            {0x4A, ("LSR", AddressMode.IMP, LSRAcc)},
+            {0x4A, ("LSR", AddressMode.ACC, LSRAcc)},
             {0x46, ("LSR", AddressMode.ZPG, LSRZpg)},
             {0x56, ("LSR", AddressMode.ZPX, LSRZpgX)},
             {0x4E, ("LSR", AddressMode.ABS, LSRAbs)},
             {0x5E, ("LSR", AddressMode.ABX, LSRAbsX)},
 
-            {0x2A, ("ROL", AddressMode.IMP, ROLAcc)},
+            {0x2A, ("ROL", AddressMode.ACC, ROLAcc)},
             {0x26, ("ROL", AddressMode.ZPG, ROLZpg)},
             {0x36, ("ROL", AddressMode.ZPX, ROLZpgX)},
             {0x2E, ("ROL", AddressMode.ABS, ROLAbs)},
             {0x3E, ("ROL", AddressMode.ABX, ROLAbsX)},
 
-            {0x6A, ("ROR", AddressMode.IMP, RORAcc)},
+            {0x6A, ("ROR", AddressMode.ACC, RORAcc)},
             {0x66, ("ROR", AddressMode.ZPG, RORZpg)},
             {0x76, ("ROR", AddressMode.ZPX, RORZpgX)},
             {0x6E, ("ROR", AddressMode.ABS, RORAbs)},
@@ -353,12 +354,13 @@ public partial class Cpu
         SP = 0xFD;
         Status = CpuFlags.Unused | CpuFlags.InterruptDisable;
         Cycles = 8;
-        
+        cycleCount = 0;
         Logger.Start("..\\..\\..\\test.log");
     }
 
     public void Cycle()
     {
+        cycleCount++;
         if (Cycles != 0)
         {
             Cycles--;
@@ -368,7 +370,7 @@ public partial class Cpu
         HandleInterrupt();
 
         //Unused = true;
-        Logger.StartLine();
+        Logger.StartLine(cycleCount);
         Logger.State(this);
         var opcode = ReadNextProgramByteNoLog();
         Cycles = Execute(opcode);
@@ -423,7 +425,7 @@ public partial class Cpu
             throw new Exception("Unhandled opcode: 0x" + opcode.ToString("X2"));
         }
         
-        Logger.Op(entry.Name);
+        Logger.Op(entry.Name, entry.Mode);
         
         return entry.Func.Invoke();
     }

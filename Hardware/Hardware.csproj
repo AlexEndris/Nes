@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.0.1641" />
+      <PackageReference Include="SmartFormat" Version="3.2.2" />
     </ItemGroup>
 
     <ItemGroup>

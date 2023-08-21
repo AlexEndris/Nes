@@ -9,58 +9,26 @@ public partial class Cpu
         Zero = value == 0;
     }
     
-    private byte INCZpg()
+    private byte INC(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        byte value = Read(address);
+        byte value = (byte) data;
         value++;
         SetIncFlags(value);
         Write(address, value);
         return 5;
     }
 
-    private byte INCZpgX() 
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        byte value = Read(address);
-        value++;
-        SetIncFlags(value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte INCAbs()
-    {
-        ushort actualAddress = ReadNext16BitProgram();
-        byte value = Read(actualAddress);
-        value++;
-        SetIncFlags(value);
-        Write(actualAddress, value);
-        return 6;
-    }
-
-    private byte INCAbsX() 
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + X);
-        byte value = Read(actualAddress);
-        value++;
-        SetIncFlags(value);
-        Write(actualAddress, value);
-        return 7;
-    }
-
-    private byte INX()
+    private byte INX(ushort _, ushort __)
     {
         X++;
         SetIncFlags(X);
-        return 2;
+        return 0;
     }
 
-    private byte INY() 
+    private byte INY(ushort _, ushort __) 
     {
         Y++;
         SetIncFlags(Y);
-        return 2;
+        return 0;
     }
 }

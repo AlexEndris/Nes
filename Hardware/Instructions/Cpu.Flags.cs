@@ -4,45 +4,45 @@ namespace Hardware;
 
 public partial class Cpu
 {
-    private byte CLC()
+    private byte CLC(ushort _, ushort __)
     {
         Carry = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLD()
+    private byte CLD(ushort _, ushort __)
     {
         DecimalMode = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLI()
+    private byte CLI(ushort _, ushort __)
     {
         InterruptDisable = false;
-        return 2;
+        return 0;
     }
 
-    private byte CLV()
+    private byte CLV(ushort _, ushort __)
     {
         Overflow = false;
-        return 2;
+        return 0;
     }
 
-    private byte SEC()
+    private byte SEC(ushort _, ushort __)
     {
         Carry = true;
-        return 2;
+        return 0;
     }
 
-    private byte SED()
+    private byte SED(ushort _, ushort __)
     {
         DecimalMode = true;
-        return 2;
+        return 0;
     }
 
-    private byte SEI()
+    private byte SEI(ushort _, ushort __)
     {
         InterruptDisable = true;
-        return 2;
+        return 0;
     }
 }

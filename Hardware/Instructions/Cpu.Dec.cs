@@ -9,58 +9,26 @@ public partial class Cpu
         Zero = value == 0;
     }
     
-    private byte DECZpg()
+    private byte DEC(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        byte value = Read(address);
+        byte value = (byte) data;
         value--;
         SetDecFlags(value);
         Write(address, value);
-        return 5;
+        return 0;
     }
 
-    private byte DECZpgX() 
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        byte value = Read(address);
-        value--;
-        SetDecFlags(value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte DECAbs()
-    {
-        ushort actualAddress = ReadNext16BitProgram();
-        byte value = Read(actualAddress);
-        value--;
-        SetDecFlags(value);
-        Write(actualAddress, value);
-        return 6;
-    }
-
-    private byte DECAbsX() 
-    {
-        ushort baseAddress = ReadNext16BitProgram();
-        ushort actualAddress = (ushort) (baseAddress + X);
-        byte value = Read(actualAddress);
-        value--;
-        SetDecFlags(value);
-        Write(actualAddress, value);
-        return 7;
-    }
-
-    public byte DEX()
+    private byte DEX(ushort _, ushort __)
     {
         X--;
         SetDecFlags(X);
-        return 2;
+        return 0;
     }
 
-    public byte DEY() 
+    private byte DEY(ushort _, ushort __) 
     {
         Y--;
         SetDecFlags(Y);
-        return 2;
+        return 0;
     }
 }

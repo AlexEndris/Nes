@@ -18,104 +18,39 @@ public partial class Cpu
         Carry = (initial & 0x01) > 0;
     }
 
-    private byte ROLAcc()
+    private byte ROLA(ushort _, ushort __)
     {
         ushort value = A;
         value = value.RotateLeft(Carry);
         A = (byte) value;
         SetLeftRotateFlag(value);
-        return 2;
+        return 0;
     }
 
-    private byte ROLZpg()
+    private byte ROL(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        ushort value = Read(address);
+        ushort value = data;
         value = value.RotateLeft(Carry);
         SetLeftRotateFlag(value);
         Write(address, (byte) value);
-        return 5;
+        return 0;
     }
 
-    private byte ROLZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        ushort value = Read(address);
-        value = value.RotateLeft(Carry);
-        SetLeftRotateFlag(value);
-        Write(address, (byte)value);
-        return 6;
-    }
-
-    private byte ROLAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        ushort value = Read(address);
-        value = value.RotateLeft(Carry);
-        SetLeftRotateFlag(value);
-        Write(address, (byte)value);
-        return 6;
-    }
-
-    private byte ROLAbsX()
-    {
-        ushort address = (ushort) (ReadNext16BitProgram() + X);
-        ushort value = Read(address);
-        value = value.RotateLeft(Carry);
-        SetLeftRotateFlag(value);
-        Write(address, (byte) value);
-        return 7;
-    }
-
-    private byte RORAcc()
+    private byte RORA(ushort _, ushort __)
     {
         byte initial = A;
         A = A.RotateRight(Carry);
         SetRightRotateFlag(initial, A);
-        return 2;
+        return 0;
     }
 
-    private byte RORZpg()
+    private byte ROR(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        byte value = Read(address);
+        byte value = (byte) data;
         byte initial = value;
         value = value.RotateRight(Carry);
         SetRightRotateFlag(initial, value);
         Write(address, value);
-        return 5;
-    }
-
-    private byte RORZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        byte value = Read(address);
-        byte initial = value;
-        value = value.RotateRight(Carry);
-        SetRightRotateFlag(initial, value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte RORAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        byte value = Read(address);
-        byte initial = value;
-        value = value.RotateRight(Carry);
-        SetRightRotateFlag(initial, value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte RORAbsX()
-    {
-        ushort address = (ushort) (ReadNext16BitProgram() + X);
-        byte value = Read(address);
-        byte initial = value;
-        value = value.RotateRight(Carry);
-        SetRightRotateFlag(initial, value);
-        Write(address, value);
-        return 7;
+        return 0;
     }
 }

@@ -2,16 +2,14 @@
 
 public partial class Cpu
 {
-    private byte DOP()
+    private byte DOP(ushort _, ushort __)
     {
-        ReadNextProgramByte();
-
         return 3;
     }
 
-    private byte AAC()
+    private byte AAC(ushort data, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) data;
         A = (byte) (A & value);
 
         Negative = (A & 0x80) > 0;
@@ -21,9 +19,9 @@ public partial class Cpu
         return 2;
     }
 
-    private byte ASR()
+    private byte ASR(ushort data, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) data;
         value = (byte) (A & value);
         
         Carry = (value & 0x1) > 0;
@@ -32,12 +30,12 @@ public partial class Cpu
         Negative = (A & 0x80) > 0;
         Zero = A == 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte ARR()
+    private byte ARR(ushort data, ushort _)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte) data;
         value = (byte) (A & value);
         A = (byte) ((value >> 1) | (Carry ? 0x80 : 0));
 
@@ -46,33 +44,32 @@ public partial class Cpu
         Carry = (A & 0x40) > 0;
         Overflow = ((Carry ? 0x1 : 0) ^ ((A >> 5) & 0x1)) != 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte ATX()
+    private byte ATX(ushort data, ushort __)
     {
-        byte value = ReadNextProgramByte();
+        byte value = (byte)data;
         A = value;
         X = value;
 
         Zero = A == 0;
         Negative = (A & 0x80) > 0;
         
-        return 2;
+        return 0;
     }
 
-    private byte AXS()
+    private byte AXS(ushort data, ushort __)
     {
-        byte initial = ReadNextProgramByte();
-        byte value = (byte) ((A & X) - initial);
+        byte value = (byte) ((A & X) - (byte) data);
 
-        Carry = (A & X) >= initial;
+        Carry = (A & X) >= data;
 
         X = value;
 
         Zero = X == 0;
         Negative = (X & 0x80) > 0;
         
-        return 2;
+        return 0;
     }
 }

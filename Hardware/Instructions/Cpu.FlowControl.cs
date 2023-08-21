@@ -4,29 +4,27 @@ namespace Hardware;
 
 public partial class Cpu
 {
-    private byte JMPAbs()
+    private byte JMPAbs(ushort _, ushort address)
     {
-        PC = ReadNext16BitProgram();
-        return 3; 
+        PC = address;
+        return 0; 
     }
 
-    private byte JMPInd()
+    private byte JMPInd(ushort data, ushort _)
     {
-        ushort address = ReadNext16BitProgram();
-        PC = Read16Bit(address);
-        return 5;
+        PC = data;
+        return 0;
     }
 
-    private byte JSR()
+    private byte JSR(ushort _, ushort address)
     {
-        ushort subroutineAddress = ReadNext16BitProgram();
         ushort returnAddress = (ushort) (PC - 1);
         PushToStack(returnAddress);
-        PC = subroutineAddress;
-        return 6;
+        PC = address;
+        return 0;
     }
 
-    private byte RTS()
+    private byte RTS(ushort _, ushort __)
     {
         ushort returnAddress = PopFromStack16Bit();
 
@@ -34,9 +32,9 @@ public partial class Cpu
         return 6; 
     }
 
-    private byte BCC()
+    private byte BCC(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (Carry)
             return 2;
@@ -45,13 +43,13 @@ public partial class Cpu
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BCS()
+    private byte BCS(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (!Carry)
             return 2;
@@ -60,97 +58,97 @@ public partial class Cpu
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BEQ()
+    private byte BEQ(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (!Zero)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BNE()
+    private byte BNE(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (Zero)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BPL()
+    private byte BPL(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (Negative)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BMI()
+    private byte BMI(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (!Negative)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BVC()
+    private byte BVC(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (Overflow)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 
-    private byte BVS()
+    private byte BVS(ushort data, ushort _)
     {
-        sbyte offset = (sbyte) ReadNextProgramByte();
+        sbyte offset = (sbyte) data;
         
         if (!Overflow)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
         return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 4
-            : 3);
+            ? 2
+            : 1);
     }
 }

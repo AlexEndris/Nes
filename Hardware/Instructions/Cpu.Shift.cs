@@ -18,103 +18,37 @@ public partial class Cpu
         Carry = (initial & 0x01) > 0;
     }
 
-    private byte ASLAcc()
+    private byte ASLA(ushort _, ushort __)
     {
         ushort value = (ushort) (A << 1);
         A = (byte)value;
         SetLeftShiftFlag(value);
-        return 2;
+        return 0;
     }
 
-    private byte ASLZpg()
+    private byte ASL(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        ushort value = Read(address);
+        ushort value = data;
         value <<= 1;
         SetLeftShiftFlag(value);
         Write(address, (byte)value);
-        return 5;
+        return 0;
     }
 
-    private byte ASLZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        ushort value = Read(address);
-        value <<= 1;
-        SetLeftShiftFlag(value);
-        Write(address, (byte)value);
-        return 6;
-    }
-
-    private byte ASLAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        ushort value = Read(address);
-        value <<= 1;
-        SetLeftShiftFlag(value);
-        Write(address, (byte)value);
-        return 6;
-    }
-
-    private byte ASLAbsX()
-    {
-        ushort address = (ushort) (ReadNext16BitProgram() + X);
-        ushort value = Read(address);
-        value <<= 1;
-        SetLeftShiftFlag(value);
-        Write(address, (byte)value);
-        return 7;
-    }
-
-    private byte LSRAcc()
+    private byte LSRA(ushort _, ushort __)
     {
         byte initial = A;
         A >>= 1;
         SetRightShiftFlag(initial, A);
-        return 2;
+        return 0;
     }
 
-    private byte LSRZpg()
+    private byte LSR(ushort data, ushort address)
     {
-        byte address = ReadNextProgramByte();
-        byte value = Read(address);
-        byte initial = value;
+        byte value = (byte) data; 
         value >>= 1;
-        SetRightShiftFlag(initial, value);
+        SetRightShiftFlag((byte) data, value);
         Write(address, value);
-        return 5;
-    }
-
-    private byte LSRZpgX()
-    {
-        byte address = (byte) (ReadNextProgramByte() + X);
-        byte value = Read(address);
-        byte initial = value;
-        value >>= 1;
-        SetRightShiftFlag(initial, value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte LSRAbs()
-    {
-        ushort address = ReadNext16BitProgram();
-        byte value = Read(address);
-        byte initial = value;
-        value >>= 1;
-        SetRightShiftFlag(initial, value);
-        Write(address, value);
-        return 6;
-    }
-
-    private byte LSRAbsX()
-    {
-        ushort address = (ushort) (ReadNext16BitProgram() + X);
-        byte value = Read(address);
-        byte initial = value;
-        value >>= 1;
-        SetRightShiftFlag(initial, value);
-        Write(address, value);
-        return 7;
+        return 0;
     }
 }

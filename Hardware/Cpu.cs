@@ -346,7 +346,7 @@ public partial class Cpu
     public void Reset()
     {
         PC = Bus.Read16Bit(0xFFFC);
-        //Logger.Enable();
+        Logger.Enable();
         //PC = 0xC000;
         A = 0;
         X = 0;
@@ -355,7 +355,7 @@ public partial class Cpu
         Status = CpuFlags.Unused | CpuFlags.InterruptDisable;
         Cycles = 8;
         
-        Logger.Start("..\\..\\..\\test1.log");
+        Logger.Start("..\\..\\..\\test.log");
     }
 
     public void Cycle()

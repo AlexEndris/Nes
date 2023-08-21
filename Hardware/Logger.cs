@@ -1,11 +1,11 @@
 ﻿using System.IO;
-using System.Net;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic.Logging;
+using System.Text;
 using SmartFormat;
 
 namespace Hardware;
 
+
+// ReSharper disable NotAccessedField.Global
 public struct LogLine
 {
     public ushort PC;
@@ -19,6 +19,7 @@ public struct LogLine
     public AddressMode Mode;
     public int Cycle;
 }
+// ReSharper enable NotAccessedField.Global
 
 public static class Logger
 {
@@ -32,7 +33,8 @@ public static class Logger
         if (!enabled)
             return;
 
-        _writer = File.CreateText(fileName);
+        _stream = File.Create(fileName);
+        _writer = new StreamWriter(_stream, Encoding.UTF8, 65536);
     }
 
     public static void StartLine(int cycle)
@@ -81,34 +83,10 @@ public static class Logger
     
     private static readonly string Template =
         "{LogLine.PC}: {Instruction} {LogLine:A:{A} X:{X} Y:{Y} P:{Status} SP:{SP} Cycle:{Cycle}}";
-    
-    private static readonly string Pattern =
-        "{0:X4}:\t{1:3} ${2:X2}{3:X2}\tA:{4:X2} X:{5:X2} Y:{6:X2} P:{7:X2} SP:{8:X2}";
-    private static readonly string Pattern2 =
-        "{0:X4}:\t{1:3}      \tA:{4:X2} X:{5:X2} Y:{6:X2} P:{7:X2} SP:{8:X2}";
 
     private static StreamWriter _writer;
+    private static FileStream _stream;
 
-    // public static void EndLine()
-    // {
-    //     if (!enabled)
-    //         return;
-    //     
-    //     if (logLine.Operands.HasValue)
-    //     {
-    //         var highByte = (byte) (logLine.Operands >> 8);
-    //         var lowByte = (byte) (logLine.Operands);
-    //
-    //         _writer.WriteLine(Pattern, logLine.PC, logLine.Instruction, highByte > 0 ? highByte : lowByte,
-    //             highByte > 0 ? lowByte : "  ", logLine.A, logLine.X, logLine.Y, logLine.P, logLine.SP);
-    //     }
-    //     else
-    //         _writer.WriteLine(Pattern2, logLine.PC, logLine.Instruction, "  ", "  ", logLine.A, logLine.X, logLine.Y,
-    //             logLine.P, logLine.SP);
-    //     
-    //     _writer.Flush();
-    // }    
-    
     public static void EndLine()
     {
         if (!enabled)
@@ -130,9 +108,6 @@ public static class Logger
             "{LogLine.PC:X4}: {Instruction,-12} A:{LogLine.A:X2} X:{LogLine.X:X2} Y:{LogLine.Y:X2} P:{LogLine.P:X2} SP:{LogLine.SP:X2} Cycle:{LogLine.Cycle}", model);
 
         _writer.WriteLine(line);
-        
-        if (logLine.Cycle % 1000 == 0)
-            _writer.Flush();
     }
 
     private static string FormatOperands()

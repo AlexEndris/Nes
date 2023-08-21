@@ -127,7 +127,6 @@ public class PpuBus : IBus
         }            
         else if (address is >= 0x3F00 and <= 0x3FFF)
         {
-            Console.WriteLine($"{address:X4}: {value:X2}");
             address &= 0x1F;
             if (address is 0x10 or 0x14 or 0x18 or 0x1C)
                 address &= 0b01111;

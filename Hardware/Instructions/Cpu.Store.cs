@@ -4,8 +4,6 @@ namespace Hardware;
 
 public partial class Cpu
 {
-    #region Accumulator Store Operations (STA)
-
     private byte STAZpg()
     {
         byte address = ReadNextProgramByte();
@@ -57,10 +55,6 @@ public partial class Cpu
         return 6;
     }
 
-    #endregion
-
-    #region X Register Store Operations (STX)
-
     private byte STXZpg()
     {
         byte address = ReadNextProgramByte();
@@ -77,15 +71,10 @@ public partial class Cpu
 
     private byte STXAbs()
     {
-        byte lowByte = ReadNextProgramByte();
-        byte highByte = ReadNextProgramByte();
-        Write(ByteUtil.To16Bit(highByte, lowByte), X);
+        ushort address = ReadNext16BitProgram();
+        Write(address, X);
         return 4;
     }
-
-    #endregion
-
-    #region Y Register Store Operations (STY)
 
     private byte STYZpg()
     {
@@ -103,11 +92,8 @@ public partial class Cpu
 
     private byte STYAbs()
     {
-        byte lowByte = ReadNextProgramByte();
-        byte highByte = ReadNextProgramByte();
-        Write(ByteUtil.To16Bit(highByte, lowByte), Y);
+        ushort address = ReadNext16BitProgram();
+        Write(address, Y);
         return 4;
     }
-
-    #endregion
 }

@@ -31,9 +31,7 @@ public partial class Cpu
 
     private byte DECAbs()
     {
-        byte lowByte = ReadNextProgramByte();
-        byte highByte = ReadNextProgramByte();
-        ushort actualAddress = ByteUtil.To16Bit(highByte, lowByte);
+        ushort actualAddress = ReadNext16BitProgram();
         byte value = Read(actualAddress);
         value--;
         SetDecFlags(value);
@@ -43,7 +41,7 @@ public partial class Cpu
 
     private byte DECAbsX() 
     {
-ushort baseAddress = ReadNext16BitProgram();
+        ushort baseAddress = ReadNext16BitProgram();
         ushort actualAddress = (ushort) (baseAddress + X);
         byte value = Read(actualAddress);
         value--;

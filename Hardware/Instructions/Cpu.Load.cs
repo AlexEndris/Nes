@@ -9,10 +9,6 @@ public partial class Cpu
         Negative = (value & 0x80) > 0;
         Zero = value == 0;
     }
-    
-    #region Load
-
-    #region LDA
 
     private byte LDAImm()
     {
@@ -88,10 +84,6 @@ public partial class Cpu
             : 4);
     }
 
-    #endregion
-
-    #region LDX
-
     private byte LDXImm()
     {
         X = ReadNextProgramByte();
@@ -134,10 +126,6 @@ public partial class Cpu
             : 4);
     }
 
-    #endregion
-
-    #region LDY
-
     private byte LDYImm()
     {
         Y = ReadNextProgramByte();
@@ -179,8 +167,4 @@ public partial class Cpu
             ? 5
             : 4);
     }
-
-    #endregion
-
-    #endregion
 }

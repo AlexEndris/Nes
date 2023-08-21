@@ -45,9 +45,7 @@ public partial class Cpu
 
     private byte SBCAbs()
     {
-        byte lowByte = ReadNextProgramByte();
-        byte highByte = ReadNextProgramByte();
-        ushort actualAddress = ByteUtil.To16Bit(highByte, lowByte);
+        ushort actualAddress = ReadNext16BitProgram();
         ushort value = (ushort)(Read(actualAddress) ^ 0x00FF);
         ushort sum = (ushort) (A + value + Carry.ToByte());
 

@@ -347,7 +347,7 @@ public partial class Cpu
     {
         PC = Bus.Read16Bit(0xFFFC);
         Logger.Enable();
-        PC = 0xC000;
+        //PC = 0xC000;
         A = 0;
         X = 0;
         Y = 0;

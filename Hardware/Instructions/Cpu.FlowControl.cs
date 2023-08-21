@@ -29,7 +29,7 @@ public partial class Cpu
         ushort returnAddress = PopFromStack16Bit();
 
         PC = (ushort) (returnAddress + 1);
-        return 6; 
+        return 0; 
     }
 
     private byte BCC(ushort data, ushort _)

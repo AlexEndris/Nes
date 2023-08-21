@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -13,23 +15,23 @@ public partial class Cpu
         Negative = (result & 0x80) > 0;
     }
 
-    private byte CMP(ushort data, ushort _)
+    private byte CMP(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         SetFlagsForCmp(A, value);
         return 0;
     }
 
-    private byte CPX(ushort data, ushort _)
+    private byte CPX(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         SetFlagsForCmp(X, value);
         return 0;
     }
 
-    private byte CPY(ushort data, ushort _)
+    private byte CPY(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         SetFlagsForCmp(Y, value);
         return 0;
     }

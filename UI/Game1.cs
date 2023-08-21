@@ -34,6 +34,7 @@ namespace UI
             _graphics.PreferredBackBufferHeight = 1080;
             IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / 60.1));
+            IsFixedTimeStep = false;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -59,9 +60,8 @@ namespace UI
             Cartridge cart;
             cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\nestest.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\mario.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\donkey.nes");
+            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\donkey.nes");
             //cart = TestRoms();
-
 
             nes.Insert(cart);
         }
@@ -69,10 +69,10 @@ namespace UI
         private static Cartridge TestRoms()
         {
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\01-basics.nes");
+            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\01-basics.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\02-implied.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\03-immediate.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\04-zero_page.nes");
+            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\04-zero_page.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\05-zp_xy.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\06-absolute.nes");
             //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\07-abs_xy.nes");

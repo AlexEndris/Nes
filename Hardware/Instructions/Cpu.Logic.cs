@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -19,33 +21,33 @@ public partial class Cpu
         Overflow = (value & 0x40) > 0;
     }
 
-    private byte AND(ushort data, ushort _)
+    private byte AND(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         A &= value;
         SetBitwiseFlags(A);
         return 0;
     }
 
-    private byte ORA(ushort data, ushort _)
+    private byte ORA(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         A |= value;
         SetBitwiseFlags(A);
         return 0;
     }
 
-    private byte EOR(ushort data, ushort _)
+    private byte EOR(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         A ^= value;
         SetBitwiseFlags(A);
         return 0;
     }
 
-    private byte BIT(ushort data, ushort _)
+    private byte BIT(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         SetBITFlags(value);
         return 0;
     }

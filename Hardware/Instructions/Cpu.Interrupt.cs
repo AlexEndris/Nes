@@ -1,9 +1,12 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
 {
-    private byte BRK(ushort _, ushort __)
+    private byte BRK(Func<ushort> _, ushort __)
     {
         PC++;
         
@@ -17,7 +20,7 @@ public partial class Cpu
         return 0;
     }
 
-    private byte RTI(ushort _, ushort __)
+    private byte RTI(Func<ushort> _, ushort __)
     {
         Status = (CpuFlags) PopFromStack();
         PC = PopFromStack16Bit();

@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -11,9 +14,9 @@ public partial class Cpu
         Overflow = IsOverflow(originalA, subtractedValue, sum);
     }
 
-    private byte SBC(ushort data, ushort _)
+    private byte SBC(Func<ushort> fetch, ushort _)
     {
-        ushort value = (ushort) (data ^ 0x00FF) ;
+        ushort value = (ushort) (fetch() ^ 0x00FF) ;
         ushort sum = (ushort) (A + value + Carry.ToByte());
 
         SetFlagsForSBC(A, value, sum);

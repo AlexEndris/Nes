@@ -77,7 +77,7 @@ public partial class Cpu
 
     public byte Cycles { get; private set; }
 
-    private Dictionary<byte, (string Name, AddressMode Mode, byte Cycles, Func<ushort, ushort, byte> Func)> opcodeActions;
+    private Dictionary<byte, (string Name, AddressMode Mode, byte Cycles, Func<Func<ushort>, ushort, byte> Func)> opcodeActions;
     private int cycleCount;
     
     public Cpu(IBus bus)
@@ -346,7 +346,7 @@ public partial class Cpu
     public void Reset()
     {
         PC = Bus.Read16Bit(0xFFFC);
-        Logger.Enable();
+        //Logger.Enable();
         //PC = 0xC000;
         A = 0;
         X = 0;
@@ -428,16 +428,16 @@ public partial class Cpu
 
         Logger.Op(entry.Name, entry.Mode);
 
-        (ushort value, ushort address, byte additionalCycles) = FetchData(entry.Mode);
+        (Func<ushort> fetch, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         
         byte cycles = entry.Cycles;
-        var additionalCycles2 = entry.Func.Invoke(value, address);
+        var additionalCycles2 = entry.Func.Invoke(fetch, address);
         cycles += (byte)(additionalCycles & additionalCycles2);
 
         return cycles;
     }
 
-    private (ushort value, ushort address, byte cycles) FetchData(AddressMode mode)
+    private (Func<ushort> fetch, ushort address, byte cycles) FetchData(AddressMode mode)
     {
         byte zeroPageAddress = 0;
         ushort baseAddress = 0;
@@ -447,58 +447,49 @@ public partial class Cpu
         {
             case AddressMode.IMM:
                 value = ReadNextProgramByte();
-                return (value, 0, 0);
+                return (() => value, 0, 0);
             case AddressMode.ZPG:
                 zeroPageAddress = ReadNextProgramByte();
-                value = Read(zeroPageAddress);
-                return (value, zeroPageAddress, 0);
+                return (() => Read(zeroPageAddress), zeroPageAddress, 0);
             case AddressMode.ZPX:
                 zeroPageAddress = (byte) (ReadNextProgramByte() + X);
-                value = Read(zeroPageAddress);
-                return (value, zeroPageAddress, 0);
+                return (() => Read(zeroPageAddress), zeroPageAddress, 0);
             case AddressMode.ZPY:
                 zeroPageAddress = (byte) (ReadNextProgramByte() + Y);
-                value = Read(zeroPageAddress);
-                return (value, zeroPageAddress, 0);
+                return (() => Read(zeroPageAddress), zeroPageAddress, 0);
             case AddressMode.ACC:
             case AddressMode.IMP:
-                return (0,0,0);
+                return (() => 0,0,0);
             case AddressMode.REL:
                 value = ReadNextProgramByte();
-                return (value, 0, 0); 
+                return (() => value, 0, 0); 
             case AddressMode.ABS:
                 actualAddress = ReadNext16BitProgram();
-                value = Read(actualAddress);
-                return (value, actualAddress, 0);
+                return (() => Read(actualAddress), actualAddress, 0);
             case AddressMode.ABX:
                 baseAddress = ReadNext16BitProgram();
                 actualAddress = (ushort) (baseAddress + X);
-                value = Read(actualAddress);
-                return (value, actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
+                return (() => Read(actualAddress), actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
                     ? (byte)1
                     : (byte)0);
             case AddressMode.ABY:
                 baseAddress = ReadNext16BitProgram();
                 actualAddress = (ushort) (baseAddress + Y);
-                value = Read(actualAddress);
-                return (value, actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
+                return (() => Read(actualAddress), actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
                     ? (byte)1
                     : (byte)0);
             case AddressMode.IND:
                 ushort address = ReadNext16BitProgram();
-                value = Read16Bit(address);
-                return (value, address, 0);
+                return (() => Read16Bit(address), address, 0);
             case AddressMode.INX:
                 zeroPageAddress = (byte) (ReadNextProgramByte() + X);
                 actualAddress = Read16Bit(zeroPageAddress);
-                value = Read(actualAddress);
-                return (value, actualAddress, 0);
+                return (() => Read(actualAddress), actualAddress, 0);
             case AddressMode.INY:
                 zeroPageAddress = ReadNextProgramByte();
                 baseAddress = Read16Bit(zeroPageAddress);
                 actualAddress = (ushort) (baseAddress + Y);
-                value = Read(actualAddress);
-                return (value, actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
+                return (() => Read(actualAddress), actualAddress, Memory.CrossesPageBoundary(baseAddress, actualAddress)
                     ? (byte)1
                     : (byte)0);
             default:

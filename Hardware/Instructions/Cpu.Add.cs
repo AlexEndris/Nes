@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -12,9 +14,9 @@ public partial class Cpu
         Overflow = IsOverflow(originalA, addedValue, sum);
     }
 
-    private byte ADC(ushort data, ushort _)
+    private byte ADC(Func<ushort> fetch, ushort _)
     {
-        byte value = (byte)data;
+        byte value = (byte)fetch();
         ushort sum = (ushort) (A + value + Carry.ToByte());
 
         SetFlagsForAdc(A, value, sum);

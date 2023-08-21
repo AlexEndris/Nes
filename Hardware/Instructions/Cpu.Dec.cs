@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -9,23 +12,23 @@ public partial class Cpu
         Zero = value == 0;
     }
     
-    private byte DEC(ushort data, ushort address)
+    private byte DEC(Func<ushort> fetch, ushort address)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         value--;
         SetDecFlags(value);
         Write(address, value);
         return 0;
     }
 
-    private byte DEX(ushort _, ushort __)
+    private byte DEX(Func<ushort> _, ushort __)
     {
         X--;
         SetDecFlags(X);
         return 0;
     }
 
-    private byte DEY(ushort _, ushort __) 
+    private byte DEY(Func<ushort> _, ushort __) 
     {
         Y--;
         SetDecFlags(Y);

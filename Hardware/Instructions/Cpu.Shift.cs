@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -18,7 +20,7 @@ public partial class Cpu
         Carry = (initial & 0x01) > 0;
     }
 
-    private byte ASLA(ushort _, ushort __)
+    private byte ASLA(Func<ushort> _, ushort __)
     {
         ushort value = (ushort) (A << 1);
         A = (byte)value;
@@ -26,16 +28,16 @@ public partial class Cpu
         return 0;
     }
 
-    private byte ASL(ushort data, ushort address)
+    private byte ASL(Func<ushort> fetch, ushort address)
     {
-        ushort value = data;
+        ushort value = fetch();
         value <<= 1;
         SetLeftShiftFlag(value);
         Write(address, (byte)value);
         return 0;
     }
 
-    private byte LSRA(ushort _, ushort __)
+    private byte LSRA(Func<ushort> _, ushort __)
     {
         byte initial = A;
         A >>= 1;
@@ -43,11 +45,12 @@ public partial class Cpu
         return 0;
     }
 
-    private byte LSR(ushort data, ushort address)
+    private byte LSR(Func<ushort> fetch, ushort address)
     {
-        byte value = (byte) data; 
+        byte data = (byte)fetch();
+        byte value = data; 
         value >>= 1;
-        SetRightShiftFlag((byte) data, value);
+        SetRightShiftFlag(data, value);
         Write(address, value);
         return 0;
     }

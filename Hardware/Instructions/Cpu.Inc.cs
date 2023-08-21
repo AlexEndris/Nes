@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -9,23 +12,23 @@ public partial class Cpu
         Zero = value == 0;
     }
     
-    private byte INC(ushort data, ushort address)
+    private byte INC(Func<ushort> fetch, ushort address)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         value++;
         SetIncFlags(value);
         Write(address, value);
         return 0;
     }
 
-    private byte INX(ushort _, ushort __)
+    private byte INX(Func<ushort> _, ushort __)
     {
         X++;
         SetIncFlags(X);
         return 0;
     }
 
-    private byte INY(ushort _, ushort __) 
+    private byte INY(Func<ushort> _, ushort __) 
     {
         Y++;
         SetIncFlags(Y);

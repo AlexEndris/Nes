@@ -1,22 +1,25 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+using System.Windows.Forms;
+
 namespace Hardware;
 
 public partial class Cpu
 {
-    private byte JMPAbs(ushort _, ushort address)
+    private byte JMPAbs(Func<ushort> _, ushort address)
     {
         PC = address;
         return 0; 
     }
 
-    private byte JMPInd(ushort data, ushort _)
+    private byte JMPInd(Func<ushort> fetch, ushort _)
     {
-        PC = data;
+        PC = fetch();
         return 0;
     }
 
-    private byte JSR(ushort _, ushort address)
+    private byte JSR(Func<ushort> _, ushort address)
     {
         ushort returnAddress = (ushort) (PC - 1);
         PushToStack(returnAddress);
@@ -24,7 +27,7 @@ public partial class Cpu
         return 0;
     }
 
-    private byte RTS(ushort _, ushort __)
+    private byte RTS(Func<ushort> _, ushort __)
     {
         ushort returnAddress = PopFromStack16Bit();
 
@@ -32,9 +35,9 @@ public partial class Cpu
         return 0; 
     }
 
-    private byte BCC(ushort data, ushort _)
+    private byte BCC(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (Carry)
             return 0;
@@ -49,9 +52,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BCS(ushort data, ushort _)
+    private byte BCS(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (!Carry)
             return 0;
@@ -66,9 +69,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BEQ(ushort data, ushort _)
+    private byte BEQ(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (!Zero)
             return 0;
@@ -83,9 +86,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BNE(ushort data, ushort _)
+    private byte BNE(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (Zero)
             return 0;
@@ -100,9 +103,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BPL(ushort data, ushort _)
+    private byte BPL(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (Negative)
             return 0;
@@ -117,9 +120,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BMI(ushort data, ushort _)
+    private byte BMI(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (!Negative)
             return 0;
@@ -134,9 +137,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BVC(ushort data, ushort _)
+    private byte BVC(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (Overflow)
             return 0;
@@ -151,9 +154,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte BVS(ushort data, ushort _)
+    private byte BVS(Func<ushort> fetch, ushort _)
     {
-        sbyte offset = (sbyte) data;
+        sbyte offset = (sbyte) fetch();
         
         if (!Overflow)
             return 0;

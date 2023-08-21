@@ -1,5 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
 
+using System;
+
 namespace Hardware;
 
 public partial class Cpu
@@ -18,7 +20,7 @@ public partial class Cpu
         Carry = (initial & 0x01) > 0;
     }
 
-    private byte ROLA(ushort _, ushort __)
+    private byte ROLA(Func<ushort> _, ushort __)
     {
         ushort value = A;
         value = value.RotateLeft(Carry);
@@ -27,16 +29,16 @@ public partial class Cpu
         return 0;
     }
 
-    private byte ROL(ushort data, ushort address)
+    private byte ROL(Func<ushort> fetch, ushort address)
     {
-        ushort value = data;
+        ushort value = fetch();
         value = value.RotateLeft(Carry);
         SetLeftRotateFlag(value);
         Write(address, (byte) value);
         return 0;
     }
 
-    private byte RORA(ushort _, ushort __)
+    private byte RORA(Func<ushort> _, ushort __)
     {
         byte initial = A;
         A = A.RotateRight(Carry);
@@ -44,9 +46,9 @@ public partial class Cpu
         return 0;
     }
 
-    private byte ROR(ushort data, ushort address)
+    private byte ROR(Func<ushort> fetch, ushort address)
     {
-        byte value = (byte) data;
+        byte value = (byte) fetch();
         byte initial = value;
         value = value.RotateRight(Carry);
         SetRightRotateFlag(initial, value);

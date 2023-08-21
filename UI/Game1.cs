@@ -88,7 +88,8 @@ namespace UI
         }
 
         private bool pause = false;
-        
+        private double _framesPerSecond;
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
@@ -111,6 +112,7 @@ namespace UI
 
             var end = DateTime.Now;
             _timePerFrame = (end - start);
+            _framesPerSecond = 1.0 / _timePerFrame.TotalSeconds;
             var frameTime = _timePerFrame.TotalMilliseconds;
 
             UpdateDebug();
@@ -252,7 +254,10 @@ namespace UI
             _spriteBatch.DrawString(_font, $"Stack: ${nes.Cpu.SP:X2} [{nes.Cpu.SP}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"Frame Time: {_timePerFrame.TotalMilliseconds}ms", new Vector2(screenOffsetX, offsetY),
+            _spriteBatch.DrawString(_font, $"Frame Time: {_timePerFrame.TotalMilliseconds:##.#}ms", new Vector2(screenOffsetX, offsetY),
+                Color.White);
+            offsetY += textHeight;
+            _spriteBatch.DrawString(_font, $"FPS: {_framesPerSecond:###}fps", new Vector2(screenOffsetX, offsetY),
                 Color.White);
 
             return offsetY;

@@ -15,7 +15,7 @@ public partial class Cpu
         value++;
         SetIncFlags(value);
         Write(address, value);
-        return 5;
+        return 0;
     }
 
     private byte INX(ushort _, ushort __)

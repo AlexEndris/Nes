@@ -37,14 +37,16 @@ public partial class Cpu
         sbyte offset = (sbyte) data;
         
         if (Carry)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BCS(ushort data, ushort _)
@@ -52,14 +54,16 @@ public partial class Cpu
         sbyte offset = (sbyte) data;
         
         if (!Carry)
-            return 2;
+            return 0;
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BEQ(ushort data, ushort _)
@@ -72,9 +76,11 @@ public partial class Cpu
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BNE(ushort data, ushort _)
@@ -87,9 +93,11 @@ public partial class Cpu
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BPL(ushort data, ushort _)
@@ -102,9 +110,11 @@ public partial class Cpu
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BMI(ushort data, ushort _)
@@ -117,9 +127,11 @@ public partial class Cpu
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BVC(ushort data, ushort _)
@@ -132,9 +144,11 @@ public partial class Cpu
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
 
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 
     private byte BVS(ushort data, ushort _)
@@ -146,9 +160,11 @@ public partial class Cpu
 
         ushort previousPC = PC;
         PC = (ushort) (offset + PC);
-
-        return (byte) (Memory.CrossesPageBoundary(previousPC, PC)
-            ? 2
-            : 1);
+        
+        Cycles++;
+        if (Memory.CrossesPageBoundary(previousPC, PC))
+            Cycles++;
+        
+        return 0;
     }
 }

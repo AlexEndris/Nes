@@ -34,7 +34,8 @@ public static class Logger
             return;
 
         _stream = File.Create(fileName);
-        _writer = new StreamWriter(_stream, Encoding.UTF8, 65536);
+        //_writer = new StreamWriter(_stream, Encoding.UTF8, 65536);
+        _writer = new StreamWriter(_stream, Encoding.UTF8, 4096);
     }
 
     public static void StartLine(int cycle)

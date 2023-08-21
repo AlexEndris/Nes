@@ -32,6 +32,7 @@ namespace UI
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = 1920;
             _graphics.PreferredBackBufferHeight = 1080;
+            IsFixedTimeStep = false;
             TargetElapsedTime = TimeSpan.FromTicks((long)(TimeSpan.TicksPerSecond / 60.1));
             Content.RootDirectory = "Content";
             IsMouseVisible = true;

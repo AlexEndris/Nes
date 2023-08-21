@@ -4,7 +4,7 @@ public partial class Cpu
 {
     private byte DOP(ushort _, ushort __)
     {
-        return 3;
+        return 0;
     }
 
     private byte AAC(ushort data, ushort _)

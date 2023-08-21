@@ -99,7 +99,7 @@ public partial class Cpu
             {0xBD, ("LDA", AddressMode.ABX, 4, LDA)},
             {0xB9, ("LDA", AddressMode.ABY, 4, LDA)},
             {0xA1, ("LDA", AddressMode.INX, 6, LDA)},
-            {0xB1, ("LDA", AddressMode.INY, 5, LDA)},
+            {0xB1, ("LDA", AddressMode.INY, 4, LDA)},
             {0xA2, ("LDX", AddressMode.IMM, 2, LDX)},
             {0xA6, ("LDX", AddressMode.ZPG, 3, LDX)},
             {0xB6, ("LDX", AddressMode.ZPY, 4, LDX)},
@@ -318,7 +318,7 @@ public partial class Cpu
 
             #region No Operation 1
 
-            {0xEA, ("NOP", AddressMode.IMP, 2, (_,_) => 2)},
+            {0xEA, ("NOP", AddressMode.IMP, 2, (_,_) => 0)},
             
             // Illegal
             {0x1A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
@@ -347,7 +347,7 @@ public partial class Cpu
     {
         PC = Bus.Read16Bit(0xFFFC);
         Logger.Enable();
-        //PC = 0xC000;
+        PC = 0xC000;
         A = 0;
         X = 0;
         Y = 0;
@@ -372,7 +372,7 @@ public partial class Cpu
         //Unused = true;
         Logger.StartLine(cycleCount);
         Logger.State(this);
-        Cycles = Execute();
+        Cycles += Execute();
         Logger.EndLine();
     }
 
@@ -430,8 +430,8 @@ public partial class Cpu
         (ushort value, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         
         byte cycles = entry.Cycles;
-        cycles += entry.Func.Invoke(value, address);
-        cycles += additionalCycles;
+        var additionalCycles2 = entry.Func.Invoke(value, address);
+        cycles += (byte)(additionalCycles & additionalCycles2);
 
         return cycles;
     }

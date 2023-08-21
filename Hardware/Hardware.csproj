@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
+        <TargetFramework>net6.0-windows</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.0.1641" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Instructions - Copy\**" />
+      <Compile Remove="Cpu - Copy.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Instructions - Copy\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Instructions - Copy\**" />
+    </ItemGroup>
+</Project>

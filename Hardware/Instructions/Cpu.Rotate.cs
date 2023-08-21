@@ -59,7 +59,7 @@ public partial class Cpu
 
     private byte ROLAbsX()
     {
-        ushort address = ReadNext16BitProgram();
+        ushort address = (ushort) (ReadNext16BitProgram() + X);
         ushort value = Read(address);
         value = value.RotateLeft(Carry);
         SetLeftRotateFlag(value);

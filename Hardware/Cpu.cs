@@ -76,9 +76,11 @@ public partial class Cpu
     }
 
     public byte Cycles { get; private set; }
-
+    public uint CycleCount => cycleCount;
+    
     private Dictionary<byte, (string Name, AddressMode Mode, byte Cycles, Func<Func<ushort>, ushort, byte> Func)> opcodeActions;
-    private int cycleCount;
+    private uint cycleCount;
+    
     
     public Cpu(IBus bus)
     {
@@ -358,12 +360,12 @@ public partial class Cpu
         Logger.Start("..\\..\\..\\test.log");
     }
 
-    public void Cycle()
+    public void Clock()
     {
-        cycleCount++;
         if (Cycles != 0)
         {
             Cycles--;
+            cycleCount++;
             return;
         }
 
@@ -428,6 +430,8 @@ public partial class Cpu
 
         Logger.Op(entry.Name, entry.Mode);
 
+        
+        
         (Func<ushort> fetch, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         
         byte cycles = entry.Cycles;
@@ -462,6 +466,7 @@ public partial class Cpu
                 return (() => 0,0,0);
             case AddressMode.REL:
                 value = ReadNextProgramByte();
+                Logger.Data((ushort)(PC+(sbyte)value));
                 return (() => value, 0, 0); 
             case AddressMode.ABS:
                 actualAddress = ReadNext16BitProgram();

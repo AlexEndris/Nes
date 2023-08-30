@@ -5,7 +5,7 @@ namespace Hardware;
 
 public class Nes : IResetable, IInsertable, IPixelBuffer
 {
-    private PpuBus PpuBus { get; }
+    public PpuBus PpuBus { get; }
     public Ppu Ppu { get; }
     public CpuBus CpuBus { get; }
     public Cpu Cpu { get; }
@@ -40,14 +40,42 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
 
     
     
-    public void Update(GameTime gameTime, bool pause)
+    public void Update(bool pause, bool advanceFrame, bool advanceScanline, bool advanceCycle)
     {
         if (Cartridge == null)
             return;
 
-        if (pause)
+        if (pause
+            && advanceFrame)
+        {
+            CompleteFrame();
             return;
+        }
+
+        if (pause && advanceScanline)
+        {
+            CompleteScanline();
+            return;
+        }
+
+        if (pause && advanceCycle)
+        {
+            CompleteCycle();
+        }
         
+        if(pause)
+            return;
+
+        CompleteFrame();
+    }
+
+    private void CompleteCycle()
+    {
+        Clock();
+    }
+
+    private void CompleteFrame()
+    {
         while (!Ppu.FrameComplete)
         {
             Clock();
@@ -56,9 +84,19 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
         Ppu.FrameComplete = false;
     }
 
+    private void CompleteScanline()
+    {
+        while (!Ppu.ScanlineComplete)
+        {
+            Clock();
+        }
+
+        Ppu.ScanlineComplete = false;
+    }
+    
     private void Clock()
     {
-        Ppu.Cycle();
+        Ppu.Clock();
     
         if (systemClock % 3 == 0)
         {
@@ -78,7 +116,7 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
     {
         if (!CpuBus.DmaTransfer)
         {
-            Cpu.Cycle();
+            Cpu.Clock();
             return;
         }
 

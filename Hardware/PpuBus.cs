@@ -10,6 +10,8 @@ public class PpuBus : IBus
     private Memory<byte> palette = new(new byte[0x20]);
     private Memory<byte> nameTables = new(new byte[0x800]);
 
+    public Span<byte> NameTables => nameTables.Span;
+    
     public void Insert(Cartridge cartridge)
     {
         Cartridge = cartridge;

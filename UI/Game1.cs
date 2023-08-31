@@ -58,9 +58,9 @@ namespace UI
             _font = Content.Load<SpriteFont>("fonts/Arial");
 
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\nestest.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\mario.nes");
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\donkey.nes");
+            cart = Loader.LoadFromFile(@".\nestest.nes");
+            //cart = Loader.LoadFromFile(@".\mario.nes");
+            cart = Loader.LoadFromFile(@".\donkey.nes");
             //cart = TestRoms();
 
             nes.Insert(cart);
@@ -69,22 +69,22 @@ namespace UI
         private static Cartridge TestRoms()
         {
             Cartridge cart;
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\01-basics.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\02-implied.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\03-immediate.nes");
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\04-zero_page.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\05-zp_xy.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\06-absolute.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\07-abs_xy.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\08-ind_x.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\09-ind_y.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\10-branches.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\11-stack.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\12-jmp_jsr.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\13-rts.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\14-rti.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\15-brk.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\16-special.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\01-basics.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\02-implied.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\03-immediate.nes");
+            cart = Loader.LoadFromFile(@".\rom_singles\04-zero_page.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\05-zp_xy.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\06-absolute.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\07-abs_xy.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\08-ind_x.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\09-ind_y.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\10-branches.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\11-stack.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\12-jmp_jsr.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\13-rts.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\14-rti.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\15-brk.nes");
+            //cart = Loader.LoadFromFile(@".\rom_singles\16-special.nes");
             return cart;
         }
 

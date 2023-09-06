@@ -11,7 +11,7 @@ public class LengthCounter
     };
     private bool enabled;
 
-    public byte Value { get; set; }
+    public byte Value { get; private set; }
     public bool Halt { get; set; }
 
     public bool Enabled

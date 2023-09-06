@@ -6,6 +6,7 @@ public class CpuBus : IBus
 {
     public Cartridge Cartridge { get; private set; }
     public Ppu Ppu { get; }
+    public Apu Apu { get; }
 
     private Memory<byte> ram = new(new byte[0x800]);
 
@@ -23,9 +24,10 @@ public class CpuBus : IBus
     public byte[] controllers = new byte[2];
 
     private byte[] controllerState = new byte[2];
-    public CpuBus(Ppu ppu)
+    public CpuBus(Ppu ppu, Apu apu)
     {
         Ppu = ppu;
+        Apu = apu;
     }
 
     public void Insert(Cartridge cartridge)
@@ -42,6 +44,7 @@ public class CpuBus : IBus
         {
             <= 0x1FFF => ram.Span[address & 0x07FF],
             <= 0x3FFF => Ppu.CpuRead((ushort) (address & 0x0007)),
+            <= 0x4015 => Apu.CpuRead(address),
             0x4016 or 0x4017 => GetControllerState(address),
             >= 0x6000 => Temp.Span[address & 0x1FFF],
             _ => 0
@@ -71,19 +74,20 @@ public class CpuBus : IBus
         switch (address)
         {
             case <= 0x1FFF:
-                if (address == 0x02D1)
-                    value = value;
                 ram.Span[address & 0x07FF] = value;
                 break;
             case <= 0x3FFF:
                 Ppu.CpuWrite((ushort) (address & 0x0007), value);
+                break;
+            case <= 0x4013 or 0x4015 or 0x4017:
+                Apu.CpuWrite(address, value);
                 break;
             case 0x4014:
                 DmaPage = value;
                 DmaAddress = 0;
                 DmaTransfer = true;
                 break;
-            case 0x4016 or 0x4017:
+            case 0x4016:
                 controllerState[address & 0x1] = controllers[address & 0x1];
                 break;
             case >= 0x6000:

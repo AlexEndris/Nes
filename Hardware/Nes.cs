@@ -7,6 +7,7 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
 {
     public PpuBus PpuBus { get; }
     public Ppu Ppu { get; }
+    public Apu Apu { get; }
     public CpuBus CpuBus { get; }
     public Cpu Cpu { get; }
     private Cartridge? Cartridge { get; set; }
@@ -17,7 +18,8 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
     {
         PpuBus = new PpuBus();
         Ppu = new Ppu(PpuBus, this);
-        CpuBus = new CpuBus(Ppu);
+        Apu = new Apu();
+        CpuBus = new CpuBus(Ppu, Apu);
         screen = new uint[Width * Height];
         Cpu = new Cpu(CpuBus);
     }
@@ -101,8 +103,9 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
         if (systemClock % 3 == 0)
         {
             HandleCPU();
+            Apu.Clock();
         }
-
+        
         if (Ppu.NonMaskableInterrupt)
         {
             Ppu.ResetNonMaskableInterrupt();

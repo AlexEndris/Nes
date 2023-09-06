@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 using System.Text;
 using Hardware;
@@ -32,41 +33,13 @@ namespace UI
         private Texture2D palette4;
         private TimeSpan _timePerFrame;
 
-        public static double FastSin(double x)
-        {
-            double j = x * 0.15915;
-            j = j - (int) j;
-            return 20.785 * j * (j - 0.5) * (j - 1.0);
-        }
-
-        private double SquareWave(double amplitude, double frequency, double harmonics, double dutyCycle, double time)
-        {
-            double y1 = 0;
-            double y2 = 0;
-            double p = dutyCycle * 2 * Pi;
-
-            for (int n = 1; n < harmonics; n++)
-            {
-                double c = n * frequency * 2 * Pi * time;
-                y1 += -FastSin(c) / n;
-                y2 += -FastSin(c - p * n) / n;
-            }
-
-            return (2.0 * amplitude / Pi) * (y1 - y2);
-        }
-
-        private double TriangleWave(double amplitude, double frequency, double time)
-        {
-            return Math.Abs(2 * (time * frequency - Math.Floor(time * frequency + 0.5))) * amplitude * 2 - amplitude;
-        }
-        
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = 1920;
             _graphics.PreferredBackBufferHeight = 1080;
             //IsFixedTimeStep = false;
-            TargetElapsedTime = TimeSpan.FromTicks((long) (TimeSpan.TicksPerSecond / 60.1));
+            TargetElapsedTime = TimeSpan.FromTicks((long) (TimeSpan.TicksPerSecond / 60.0988118623484));
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -76,13 +49,10 @@ namespace UI
             nes = new Nes();
 
             gameTime = new GameTime();
-
-            buffer = new byte[1024 * 2];
-            workingBuffer = new float[1024];
             
-            sound = new DynamicSoundEffectInstance(44100, AudioChannels.Mono);
+            sound = new DynamicSoundEffectInstance(48000, AudioChannels.Mono);
             //sound.BufferNeeded += SoundOnBufferNeeded;
-            sound.Play();
+            //sound.Play();
 
             nesScreen = new Texture2D(GraphicsDevice, Nes.Width, Nes.Height);
             pattern1 = new Texture2D(GraphicsDevice, 256, 256);
@@ -101,34 +71,51 @@ namespace UI
             _font = Content.Load<SpriteFont>("fonts/Cascadia");
 
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\nestest.nes");
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\mario.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\donkey.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\icarus.nes");
-            //cart = TestRoms();
+            cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes");
+            //cart = CpuTestRoms();
+            //cart = PpuTestRoms();
 
             nes.Insert(cart);
         }
 
-        private static Cartridge TestRoms()
+        private static Cartridge PpuTestRoms()
         {
             Cartridge cart;
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\01-basics.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\02-implied.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\03-immediate.nes");
-            cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\04-zero_page.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\05-zp_xy.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\06-absolute.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\07-abs_xy.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\08-ind_x.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\09-ind_y.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\10-branches.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\11-stack.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\12-jmp_jsr.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\13-rts.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\14-rti.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\15-brk.nes");
-            //cart = Loader.LoadFromFile(@"D:\Development\Programming\c#\NES\UI\rom_singles\16-special.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\01-vbl_basics.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\02-vbl_set_time.nes");
+            cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\03-vbl_clear_time.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\04-nmi_control.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\05-nmi_timing.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\06-suppression.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\07-nmi_on_timing.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\08-nmi_off_timing.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\09-even_odd_frames.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\ppu_tests\10-even_odd_timing.nes");
+
+            return cart;
+        }
+        
+        private static Cartridge CpuTestRoms()
+        {
+            Cartridge cart;
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\01-basics.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\02-implied.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\03-immediate.nes");
+            cart = Loader.LoadFromFile(@"..\..\..\rom_singles\04-zero_page.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\05-zp_xy.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\06-absolute.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\07-abs_xy.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\08-ind_x.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\09-ind_y.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\10-branches.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\11-stack.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\12-jmp_jsr.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\13-rts.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\14-rti.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\15-brk.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\rom_singles\16-special.nes");
             return cart;
         }
 
@@ -152,8 +139,12 @@ namespace UI
 
             this.gameTime = gameTime;
 
-            // while (sound.PendingBufferCount < 2)
-            //     SubmitBuffer();
+            if (nes.Apu.HasSamples())
+            {
+                SubmitBuffer();
+                if (sound.State != SoundState.Playing)
+                    sound.Play();
+            }
 
             EmulationInput();
             UpdateInput();
@@ -178,55 +169,46 @@ namespace UI
             base.Update(gameTime);
         }
 
-        private float[] workingBuffer;
-        private byte[] buffer;
-    
-
         private void SubmitBuffer()
         {
-            FillWorkBuffer();
-            ConvertBuffer(workingBuffer, buffer);
+            var workingBuffer = nes.Apu.GetOutputBuffer();
+            var buffer = ConvertBuffer(workingBuffer);
             sound.SubmitBuffer(buffer);
         }
 
-        private void ConvertBuffer(float[] from, byte[] to)
+        private byte[] ConvertBuffer(double[] from)
         {
+            const int channels = 1;
             const int bytesPerSample = 2;
             int bufferSize = from.Length;
-
+            byte[] to = new byte[bufferSize * channels * 2];
+            
             for (int i = 0; i < bufferSize; i++)
-            {
-                float floatSample = Math.Clamp(from[i], -1.0f, 1.0f);
-
-                short shortSample =
-                    (short) (floatSample >= 0 ? floatSample * short.MaxValue : floatSample * short.MinValue * -1);
-
-                int index = i * bytesPerSample;
-
-                if (!BitConverter.IsLittleEndian)
+                for (int c = 0; c < channels; c++)
                 {
-                    to[index] = (byte)(shortSample >> 8);
-                    to[index + 1] = (byte)shortSample;
-                }
-                else
-                {
-                    to[index] = (byte)shortSample;
-                    to[index + 1] = (byte)(shortSample >> 8);
-                }
-            }
-        }
-        
-        private void FillWorkBuffer()
-        {
-            for (int i = 0; i < 1024; i++)
-            {
-                //workingBuffer[i] = (float) (Math.Sin(440 * time * 2 * Pi) * 0.2);
-                //workingBuffer[i] = (float) (SquareWave(.1, 440, 20, .5, time));
-                workingBuffer[i] = (float) (TriangleWave(.1, 110, time));
+                    var fromIndex = i * channels + c;
+                    double clampedSample = Math.Clamp(from[fromIndex], -1.0f, 1.0f);
 
-                time += 1.0 / 44100;
-            }
+                    short shortSample =
+                        (short) (clampedSample >= 0 ? clampedSample * short.MaxValue : clampedSample * short.MinValue * -1);
+
+                    int index = i * channels * bytesPerSample + c * bytesPerSample;
+
+                    if (!BitConverter.IsLittleEndian)
+                    {
+                        to[index] = (byte)(shortSample >> 8);
+                        to[index + 1] = (byte)shortSample;
+                    }
+                    else
+                    {
+                        to[index] = (byte)shortSample;
+                        to[index + 1] = (byte)(shortSample >> 8);
+                    }
+                }
+
+            return to;
         }
+
 
         private void EmulationInput()
         {

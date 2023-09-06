@@ -18,7 +18,7 @@ public class Triangle
     public ushort GetSample()
     {
         if (PeriodReload <= 2)
-            return 7;
+            return 0;
 
         return sequenceLookup[sequence];
     }

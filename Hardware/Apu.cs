@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Hardware.Audio;
 using SharpDX.Direct2D1.Effects;
@@ -30,6 +31,8 @@ public class Apu
             table.Add(163.67 / (24329.0 / i + 100));
         tndLookup = table.ToArray();
 
+        CreateHannWindow(50);
+        
         // Pulse 1 is wired differently
         Pulse[0].OnesComplement = true;
     }
@@ -214,8 +217,6 @@ public class Apu
         Noise.Clock();
         
         double output = MixSamples();
-        rawSampleBuffer.Add(output);
-
         Downsample(output);
         
         cycle++;
@@ -223,14 +224,34 @@ public class Apu
 
     private void Downsample(double sample)
     {
+        rawSampleBuffer.Add(sample);
         if (cycle < nextSampleAt)
             return;
 
+        ApplyHann();
+        
         var downSampled = rawSampleBuffer.Average();
+        var filtered = highPass(downSampled, 37.0);
+        
         rawSampleBuffer.Clear();
-        sampleBuffer.Add(downSampled);
+        sampleBuffer.Add(filtered);
+        nextSampleAt = (uint) ((generatedSamples + 1) * ((float)cpuClock / sampleRate));
         generatedSamples++;
-        nextSampleAt = (generatedSamples + 1) * (cpuClock / sampleRate);
+    }
+
+    private double[] hannWindow;
+
+    private void CreateHannWindow(int size)
+    {
+        hannWindow = new double[size];
+        for(int i = 0; i < size; i++)
+            hannWindow[i] = 0.5 * (1 - Math.Cos(2 * Math.PI * i / (size - 1)));
+    }
+    
+    private void ApplyHann()
+    {
+        for (int i = 0; i < rawSampleBuffer.Count; i++)
+            rawSampleBuffer[i] *= hannWindow[i];
     }
 
     private List<double> rawSampleBuffer = new(50);
@@ -261,14 +282,10 @@ public class Apu
         ushort pulse2 = Pulse[1].GetSample();
         ushort triangle = Triangle.GetSample(); 
         ushort noise = Noise.GetSample(); 
-        ushort dmc = 48;
+        ushort dmc = 0;
 
         int combinedPulse = pulse1 + pulse2;
-        //double pulseOut = combinedPulse == 0 ? 0.0 : pulseLookup[combinedPulse-1];
         double pulseOut = 0.00752 * combinedPulse;
-        
-        int combinedTnd = 3 * triangle + 2 * noise + dmc;
-        //double tndOut = combinedTnd == 0 ? 0.0 : tndLookup[combinedTnd - 1];
         double tndOut = 0.00851 * triangle + 0.00494 * noise + 0.00335 * dmc;
 
         double output = pulseOut + tndOut;
@@ -276,6 +293,26 @@ public class Apu
         return output;
     }
 
+    private double lastSample = 0;
+    private double highPass(double sample, double cutoff)
+    {
+        double dt = 1.0 / sampleRate;
+        double rc = 1.0 / cutoff;
+        double alpha = rc / (rc + dt);
+        double filteredSample = alpha * (lastSample + sample - lastSample);
+        lastSample = filteredSample;
+        return filteredSample;
+    }
+
+    private double lowPassSample = 0;
+    private double lowPass(double sample, double cutoff){
+        double dt = 1.0 / sampleRate;
+        double rc = 1.0 / (cutoff * 2 * Math.PI);
+        double alpha = dt / (rc + dt);
+        lowPassSample += (sample - lowPassSample) * alpha;
+        return lowPassSample;
+    }
+    
     private void QuarterFrame()
     {
         Pulse[0].Envelope.Clock();

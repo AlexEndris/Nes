@@ -1,42 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Hardware.Audio;
+using Hardware.Audio.Filters;
+using SharpDX.Direct2D1;
 using SharpDX.Direct2D1.Effects;
+using static System.Math;
+using Triangle = Hardware.Audio.Triangle;
 
 namespace Hardware;
 
 public class Apu
 {
-    public SquarePulse[] Pulse { get; } = {new(), new()};
+    // Pulse 1 is wired differently
+    public SquarePulse[] Pulse { get; } = {new() {OnesComplement = true}, new()};
     public Triangle Triangle { get; } = new();
     public Noise Noise { get; } = new();
 
-    private double[] pulseLookup;
-    private double[] tndLookup;
-    
-
     private FrameCounter frameCounter = new();
     private uint cycle;
+    
+    private uint cpuClock = 1_789_773;
+    private uint sampleRate = 48_000;
 
+    private int bufferSize;
+    private FilterChain Filters { get; }
+    
     public Apu()
     {
-        var table = new List<double>(31);
-        for (int i = 1; i <= 31; i++)
-            table.Add(95.52/(8128.0 / i +100));
-        pulseLookup = table.ToArray();
+        Filters = new FilterChain(cpuClock);
 
-        table = new List<double>(203);
-        for (int i = 1; i <= 203; i++)
-            table.Add(163.67 / (24329.0 / i + 100));
-        tndLookup = table.ToArray();
-
-        CreateHannWindow(50);
+        bufferSize = GetBufferSize(sampleRate);
+        sampleBuffer = new List<double>(bufferSize);
         
-        // Pulse 1 is wired differently
-        Pulse[0].OnesComplement = true;
+        InitializeFilters();
     }
-    
+
+    private void InitializeFilters()
+    {
+        // Downsample a bit to not be too computational involved
+        // This has to be at least twice the target sample rate
+        double intermediateSamplerate = sampleRate * 2.1;
+        // This must be just below half
+        double intermediateCutoff = sampleRate * 0.40;
+
+        // Some light filtering against aliasing
+        Filters.Add(new LowPassIIR(cpuClock, intermediateCutoff), cpuClock);
+
+        // NTSC NES Filters
+        Filters.Add(new HighPassIIR(intermediateSamplerate, 90), intermediateSamplerate);
+        Filters.Add(new HighPassIIR(intermediateSamplerate, 440), intermediateSamplerate);
+        Filters.Add(new LowPassIIR(intermediateSamplerate, 14000), intermediateSamplerate);
+
+        // Remove the last bit of aliasing
+        double cutoff = sampleRate * 0.45;
+        Filters.Add(new LowPassFIR(intermediateSamplerate, cutoff, 16), intermediateSamplerate);
+    }
+
     public byte CpuRead(ushort address)
     {
         if (address != 0x4015) 
@@ -48,10 +68,10 @@ public class Apu
             status += 0b0000_0001; 
         if (Pulse[1].Counter.Value > 0)
             status += 0b0000_0010; 
-        // if (Triangle.Counter.Value > 0)
-        //     status += 0b0000_0100; 
-        // if (Noise.Counter.Value > 0)
-        //     status += 0b0000_1000; 
+        if (Triangle.Counter.Value > 0)
+            status += 0b0000_0100; 
+        if (Noise.Counter.Value > 0)
+            status += 0b0000_1000; 
         // if (Dmc.Remaining > 0)
         //     status += 0b0001_0000; 
             
@@ -216,8 +236,9 @@ public class Apu
         Triangle.Clock();
         Noise.Clock();
         
-        double output = MixSamples();
-        Downsample(output);
+        double sample = MixSamples();
+        sample = Filters.Process(sample);
+        Downsample(sample);
         
         cycle++;
     }
@@ -227,43 +248,36 @@ public class Apu
         rawSampleBuffer.Add(sample);
         if (cycle < nextSampleAt)
             return;
-
-        ApplyHann();
         
-        var downSampled = rawSampleBuffer.Average();
-        var filtered = highPass(downSampled, 37.0);
-        
+        //var downSampled = rawSampleBuffer.Average();
+       
         rawSampleBuffer.Clear();
-        sampleBuffer.Add(filtered);
+        sampleBuffer.Add(sample);
         nextSampleAt = (uint) ((generatedSamples + 1) * ((float)cpuClock / sampleRate));
         generatedSamples++;
     }
 
-    private double[] hannWindow;
-
-    private void CreateHannWindow(int size)
-    {
-        hannWindow = new double[size];
-        for(int i = 0; i < size; i++)
-            hannWindow[i] = 0.5 * (1 - Math.Cos(2 * Math.PI * i / (size - 1)));
-    }
-    
-    private void ApplyHann()
-    {
-        for (int i = 0; i < rawSampleBuffer.Count; i++)
-            rawSampleBuffer[i] *= hannWindow[i];
-    }
-
     private List<double> rawSampleBuffer = new(50);
-    private List<double> sampleBuffer = new(800);
+    private List<double> sampleBuffer;
     
     public bool HasSamples()
     {
-        return sampleBuffer.Count >= 64;
+        return sampleBuffer.Count >= bufferSize;
     }
 
-    private uint cpuClock = 1789773;
-    private uint sampleRate = 48000;
+    private static int GetBufferSize(uint sampleRate)
+    {
+        var samplesPerFrame = sampleRate / 60;
+        int bufferSize = 1;
+
+        while (bufferSize < samplesPerFrame)
+        {
+            bufferSize *= 2;
+        }
+
+        return bufferSize;
+    }
+
     private uint nextSampleAt = 0;
     private uint generatedSamples = 0;
     
@@ -291,26 +305,6 @@ public class Apu
         double output = pulseOut + tndOut;
 
         return output;
-    }
-
-    private double lastSample = 0;
-    private double highPass(double sample, double cutoff)
-    {
-        double dt = 1.0 / sampleRate;
-        double rc = 1.0 / cutoff;
-        double alpha = rc / (rc + dt);
-        double filteredSample = alpha * (lastSample + sample - lastSample);
-        lastSample = filteredSample;
-        return filteredSample;
-    }
-
-    private double lowPassSample = 0;
-    private double lowPass(double sample, double cutoff){
-        double dt = 1.0 / sampleRate;
-        double rc = 1.0 / (cutoff * 2 * Math.PI);
-        double alpha = dt / (rc + dt);
-        lowPassSample += (sample - lowPassSample) * alpha;
-        return lowPassSample;
     }
     
     private void QuarterFrame()

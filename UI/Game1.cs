@@ -160,7 +160,7 @@ namespace UI
             _framesPerSecond = 1.0 / _timePerFrame.TotalSeconds;
             var frameTime = _timePerFrame.TotalMilliseconds;
             
-            UpdateDebug();
+            //UpdateDebug();
             
             previousState = Keyboard.GetState();
             advanceScanline = false;

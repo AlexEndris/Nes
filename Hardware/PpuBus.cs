@@ -7,10 +7,10 @@ namespace Hardware;
 public class PpuBus : IBus
 {
     public Cartridge Cartridge { get; private set; }
-    private Memory<byte> palette = new(new byte[0x20]);
-    private Memory<byte> nameTables = new(new byte[0x800]);
+    private byte[] palette = new byte[0x20];
+    private byte[] nameTables = new byte[0x800];
 
-    public Span<byte> NameTables => nameTables.Span;
+    public byte[] NameTables => nameTables;
     
     public void Insert(Cartridge cartridge)
     {
@@ -34,13 +34,13 @@ public class PpuBus : IBus
                     switch (address)
                     {
                         case <= 0x03FF:
-                            return nameTables.Span[address & 0x3FF];
+                            return nameTables[address & 0x3FF];
                         case <= 0x07FF:
-                            return nameTables.Span[(address & 0x3FF) | 0x400];
+                            return nameTables[(address & 0x3FF) | 0x400];
                         case <= 0x0BFF:
-                            return nameTables.Span[address & 0x3FF];
+                            return nameTables[address & 0x3FF];
                         case <= 0x0FFF:
-                            return nameTables.Span[(address & 0x3FF) | 0x400];
+                            return nameTables[(address & 0x3FF) | 0x400];
                     }
 
                     break;
@@ -48,13 +48,13 @@ public class PpuBus : IBus
                     switch (address)
                     {
                         case <= 0x03FF:
-                            return nameTables.Span[address & 0x3FF];
+                            return nameTables[address & 0x3FF];
                         case <= 0x07FF:
-                            return nameTables.Span[(address & 0x3FF)];
+                            return nameTables[(address & 0x3FF)];
                         case <= 0x0BFF:
-                            return nameTables.Span[(address & 0x3FF) | 0x400];
+                            return nameTables[(address & 0x3FF) | 0x400];
                         case <= 0x0FFF:
-                            return nameTables.Span[(address & 0x3FF) | 0x400];
+                            return nameTables[(address & 0x3FF) | 0x400];
                     }
 
                     break;
@@ -67,7 +67,7 @@ public class PpuBus : IBus
             if (address is 0x10 or 0x14 or 0x18 or 0x1C)
                 address &= 0xF;
             
-            return palette.Span[address];
+            return palette[address];
         }        
         return 0;
     }
@@ -93,16 +93,16 @@ public class PpuBus : IBus
                     switch (address)
                     {
                         case <= 0x03FF:
-                            nameTables.Span[address & 0x3FF] = value;
+                            nameTables[address & 0x3FF] = value;
                             break;
                         case <= 0x07FF:
-                            nameTables.Span[(address & 0x3FF) | 0x400] = value;
+                            nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                         case <= 0x0BFF:
-                            nameTables.Span[address & 0x3FF] = value;
+                            nameTables[address & 0x3FF] = value;
                             break;
                         case <= 0x0FFF:
-                            nameTables.Span[(address & 0x3FF) | 0x400] = value;
+                            nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                     }
 
@@ -111,16 +111,16 @@ public class PpuBus : IBus
                     switch (address)
                     {
                         case <= 0x03FF:
-                            nameTables.Span[address & 0x3FF] = value;
+                            nameTables[address & 0x3FF] = value;
                             break;
                         case <= 0x07FF:
-                            nameTables.Span[(address & 0x3FF) ] = value;
+                            nameTables[(address & 0x3FF) ] = value;
                             break;
                         case <= 0x0BFF:
-                            nameTables.Span[(address & 0x3FF) | 0x400] = value;
+                            nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                         case <= 0x0FFF:
-                            nameTables.Span[(address & 0x3FF) | 0x400] = value;
+                            nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                     }
 
@@ -133,7 +133,7 @@ public class PpuBus : IBus
             if (address is 0x10 or 0x14 or 0x18 or 0x1C)
                 address &= 0b01111;
             
-            palette.Span[address] = value;
+            palette[address] = value;
         }
     }
 }

@@ -5,8 +5,9 @@ namespace Hardware;
 
 public class Nes : IResetable, IInsertable, IPixelBuffer
 {
-    private PpuBus PpuBus { get; }
+    public PpuBus PpuBus { get; }
     public Ppu Ppu { get; }
+    public Apu Apu { get; }
     public CpuBus CpuBus { get; }
     public Cpu Cpu { get; }
     private Cartridge? Cartridge { get; set; }
@@ -17,7 +18,8 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
     {
         PpuBus = new PpuBus();
         Ppu = new Ppu(PpuBus, this);
-        CpuBus = new CpuBus(Ppu);
+        Apu = new Apu();
+        CpuBus = new CpuBus(Ppu, Apu);
         screen = new uint[Width * Height];
         Cpu = new Cpu(CpuBus);
     }
@@ -40,14 +42,42 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
 
     
     
-    public void Update(GameTime gameTime, bool pause)
+    public void Update(bool pause, bool advanceFrame, bool advanceScanline, bool advanceCycle)
     {
         if (Cartridge == null)
             return;
 
-        if (pause)
+        if (pause
+            && advanceFrame)
+        {
+            CompleteFrame();
             return;
+        }
+
+        if (pause && advanceScanline)
+        {
+            CompleteScanline();
+            return;
+        }
+
+        if (pause && advanceCycle)
+        {
+            CompleteCycle();
+        }
         
+        if(pause)
+            return;
+
+        CompleteFrame();
+    }
+
+    private void CompleteCycle()
+    {
+        Clock();
+    }
+
+    private void CompleteFrame()
+    {
         while (!Ppu.FrameComplete)
         {
             Clock();
@@ -56,15 +86,26 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
         Ppu.FrameComplete = false;
     }
 
+    private void CompleteScanline()
+    {
+        while (!Ppu.ScanlineComplete)
+        {
+            Clock();
+        }
+
+        Ppu.ScanlineComplete = false;
+    }
+    
     private void Clock()
     {
-        Ppu.Cycle();
+        Ppu.Clock();
     
         if (systemClock % 3 == 0)
         {
             HandleCPU();
+            Apu.Clock();
         }
-
+        
         if (Ppu.NonMaskableInterrupt)
         {
             Ppu.ResetNonMaskableInterrupt();
@@ -78,7 +119,7 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
     {
         if (!CpuBus.DmaTransfer)
         {
-            Cpu.Cycle();
+            Cpu.Clock();
             return;
         }
 

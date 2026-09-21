@@ -24,22 +24,33 @@ public class Cartridge
 
     public bool CpuRead(ushort address, out byte value)
     {
-        if (Mapper.CpuRead(address, out var mappedAddress))
-        {
-            value = PrgMem.Span[mappedAddress];
-            return true;
-        }
-
+        // Needs to be initialised anyhow
         value = 0;
-        return false;
+        if (!Mapper.IsCpuRead(address))
+            return false;
+
+        // If the mapped address doesn't get a value, despite the mapper saying
+        // it'll handle the mapping, then the mapper already handled the reading as well
+        var mappedAddress = Mapper.CpuRead(address, ref value);
+        
+        if (mappedAddress.HasValue)
+            value = PrgMem.Span[mappedAddress.Value];
+        
+        return true;
     }
 
     public bool CpuWrite(ushort address, byte value)
     {
-        if (!Mapper.CpuWrite(address, out var mappedAddress))
+        if (!Mapper.IsCpuWrite(address))
             return false;
-
-        PrgMem.Span[mappedAddress] = value;
+        
+        // If the mapped address doesn't get a value, despite the mapper saying
+        // it'll handle the mapping, then the mapper already handled the writing as well
+        var mappedAddress = Mapper.CpuWrite(address, value);
+        
+        if (mappedAddress.HasValue)
+            PrgMem.Span[mappedAddress.Value] = value;
+        
         return true;
     }
 

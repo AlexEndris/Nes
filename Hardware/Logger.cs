@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using SharpDX.Direct3D9;
 using SmartFormat;
 
 namespace Hardware;
@@ -20,7 +19,7 @@ public struct LogLine
     public byte Y;
     public ushort SP;
     public AddressMode Mode;
-    public int Cycle;
+    public uint Cycle;
 }
 // ReSharper enable NotAccessedField.Global
 
@@ -55,7 +54,7 @@ public static class Logger
         }
     }
 
-    public static void StartLine(int cycle)
+    public static void StartLine(uint cycle)
     {
         if (!enabled)
             return;
@@ -96,17 +95,23 @@ public static class Logger
         logLine.Operands = data;
     }
 
-    private static readonly string OperandsDefault =
-        "{Mode:choose(IMP|ACC|IMM):||#$|$}{Operands}{Mode:choose(ZPX|ZPY|ABX|ABY):,X|,Y|,X|,Y|}";
+    private static readonly string OperandsImm = "#${0}";
 
+    private static readonly string OperandsDefault = "${0}";
+    
     private static readonly string OperandsInx =
-        "(${Operands},X)";
+        "(${0},X)";    
+    private static readonly string OperandsX =
+        "${0},X";    
+    private static readonly string OperandsY =
+        "${0},Y";    
+
     
     private static readonly string OperandsIny =
-        "(${Operands}),Y";
+        "(${0}),Y";
     
     private static readonly string OperandsInd =
-        "(${Operands})";
+        "(${0})";
     
     private static readonly string Instruction = 
             "{LogLine:{Instruction}} {Operands}";
@@ -116,7 +121,7 @@ public static class Logger
 
     private static string GetLine(LogLine line)
     {
-        var operands = FormatOperands();
+        var operands = FormatOperands(line);
         object model = new
         {
             LogLine = line,
@@ -141,10 +146,11 @@ public static class Logger
         _lines.Add(logLine);
     }
     
-    private static string FormatOperands()
+    private static string FormatOperands(LogLine line)
     {
-        var operands = logLine.Operands;
-        var mode = logLine.Mode;
+        var operands = line.Operands;
+        var mode = line.Mode;
+        
         var bytes = operands switch
         {
             null when mode != AddressMode.ACC => string.Empty,
@@ -153,18 +159,19 @@ public static class Logger
             _ => $"{operands:X2}"
         };
 
-        var model = new
-        {
-            Mode = mode,
-            Operands = bytes
-        };
-
         return mode switch
         {
-            AddressMode.INX => Smart.Format(OperandsInx, model),
-            AddressMode.INY => Smart.Format(OperandsIny, model),
-            AddressMode.IND => Smart.Format(OperandsInd, model),
-            _ => Smart.Format(OperandsDefault, model)
+            AddressMode.INX => string.Format(OperandsInx, bytes),
+            AddressMode.INY => string.Format(OperandsIny, bytes),
+            AddressMode.IMM => string.Format(OperandsImm, bytes),
+            AddressMode.IMP => "",
+            AddressMode.ACC => "",
+            AddressMode.ZPX => string.Format(OperandsX, bytes),
+            AddressMode.ABX => string.Format(OperandsX, bytes),
+            AddressMode.ZPY => string.Format(OperandsY, bytes),
+            AddressMode.ABY => string.Format(OperandsY, bytes),
+            AddressMode.IND => string.Format(OperandsInd, bytes),
+            _ => string.Format(OperandsDefault, bytes)
         };
     }
 }

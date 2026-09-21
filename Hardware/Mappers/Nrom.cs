@@ -12,29 +12,30 @@ public class Nrom : IMapper
         ChrBanks = chrBanks;
     }
 
-    public bool CpuRead(ushort address, out ushort mappedAddress)
+    public bool IsCpuRead(ushort address)
     {
-        if (address >= 0x8000)
-        {
-            mappedAddress = (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF)); 
-            
-            return true;
-        }
-
-        mappedAddress = 0;
-        return false;
+        return address >= 0x8000;
     }
 
-    public bool CpuWrite(ushort address, out ushort mappedAddress)
+    public ushort? CpuRead(ushort address, ref byte data)
     {
-        if (address >= 0x8000)
-        {
-            mappedAddress = (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF));
-            return true;
-        }
+        if (address < 0x8000)
+            return null;
+        
+        return (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF));
+    }
 
-        mappedAddress = 0;
-        return false;
+    public bool IsCpuWrite(ushort address)
+    {
+        return address >= 0x8000;
+    }
+
+    public ushort? CpuWrite(ushort address, byte data)
+    {
+        if (address < 0x8000) 
+            return null;
+        
+        return (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF));
     }
 
     public bool PpuRead(ushort address, out ushort mappedAddress)

@@ -29,14 +29,18 @@ public class Ppu
     private bool ShowSpriteLeft => (mask & 0x4) > 0;
 
     private VRamAddress vram;
+    public VRamAddress VRam => vram;
     private VRamAddress tram;
+    public VRamAddress TRam => tram;
     private byte lastWrittenValue;
 
-    private byte FineX;
+    private byte fineX;
+    public byte FineX => fineX;
 
     private ushort BackgroundBaseAddress => (ushort) ((control & 0x10) > 0 ? 0x1000 : 0x0000);
     public bool NonMaskableInterrupt { get; private set; }
     public bool FrameComplete { get; set; }
+    public bool ScanlineComplete { get; set; }
 
     public Memory<ObjectAttributeEntry> OAM = new(new ObjectAttributeEntry[64]);
 
@@ -48,7 +52,9 @@ public class Ppu
 
     public void Reset()
     {
-        FineX = 0;
+        frameCount = 0;
+        cycleCount = 0;
+        fineX = 0;
         addressLatch = false;
         scanline = 0;
         cycle = 0;
@@ -108,6 +114,8 @@ public class Ppu
         {
             case 0:
                 control = value;
+                tram.NametableX = (byte) (control.Nametable & 0x01);
+                tram.NametableY = (byte) ((control.Nametable & 0x10) >> 1);
                 break;
             case 1:
                 mask = value;
@@ -121,18 +129,16 @@ public class Ppu
             case 5:
                 if (!addressLatch)
                 {
-                    tram = (ushort) ((tram & 0xFFE0) | (value >> 3));
-                    FineX = (byte) (value & 0x7);
+                    tram.CoarseX = (byte) (value >> 3);
+                    fineX = (byte) (value & 0x7);
                     addressLatch = true;
                 }
                 else
                 {
-                    tram = (ushort) (tram & 0x8FFF | ((value & 0x7) << 12));
-                    tram = (ushort) (tram & 0xFC1F | (value << 2));
-                    vram = tram;
+                    tram.FineY = (byte) (data & 0x07);
+                    tram.CoarseY = (byte) (data >> 3);
                     addressLatch = false;
                 }
-
                 break;
             case 6:
                 if (!addressLatch)
@@ -170,14 +176,22 @@ public class Ppu
 
     private short scanline = -1;
     private ushort cycle = 0;
-
+    private uint cycleCount = 0;
+    private uint frameCount = 0;
+    public short Scanline => scanline;
+    public ushort Cycle => cycle;
+    public uint CycleCount => cycleCount;
+    public uint FrameCount => frameCount;
+    
+    
     private byte spriteCount = 0;
     private ObjectAttributeEntry[] sprites = new ObjectAttributeEntry[8];
     private byte[] spritePixelLow = new byte[8];
     private byte[] spritePixelHigh = new byte[8];
 
-    public void Cycle()
+    public void Clock()
     {
+        cycleCount++;
         switch (scanline)
         {
             case -1 or 261: // Pre-Render
@@ -209,9 +223,11 @@ public class Ppu
         cycle++;
         if (cycle < 341) return;
         cycle = 0;
+        ScanlineComplete = true;
         scanline++;
         if (scanline < 261) return;
         scanline = -1;
+        frameCount++;
         FrameComplete = true;
     }
 
@@ -354,8 +370,7 @@ public class Ppu
 
             if (spriteCount >= 8)
             {
-                // increment for potential sprite overflow
-                spriteCount++;
+                status.SpriteOverflow = true;
                 break;
             }
 
@@ -368,11 +383,9 @@ public class Ppu
             sprites[spriteCount] = OAM.Span[i];
             spriteCount++;
         }
-
-        spriteOverflow = spriteCount >= 8;
     }
 
-    private readonly uint[] nesColorPalette =
+    private readonly uint[] ntscColors =
     {
         0x7C7C7CFF, 0x0000FCFF, 0x0000BCFF, 0x4428BCFF, 0x940084FF, 0xA80020FF, 0xA81000FF, 0x881400FF,
         0x503000FF, 0x007800FF, 0x006800FF, 0x005800FF, 0x004058FF, 0x000000FF, 0x000000FF, 0x000000FF,
@@ -384,6 +397,18 @@ public class Ppu
         0xF8D878FF, 0xD8F878FF, 0xB8F8B8FF, 0xB8F8D8FF, 0x00FCFCFF, 0xF8D8F8FF, 0x000000FF, 0x000000FF
     };
 
+    private uint[] palColors =
+    {
+        0x545454FF, 0x001E74FF, 0x081090FF, 0x300088FF, 0x440064FF, 0x5C0030FF, 0x540400FF, 0x3C1800FF,
+        0x202A00FF, 0x083A00FF, 0x004000FF, 0x003C00FF, 0x00323CFF, 0x000000FF, 0x000000FF, 0x000000FF,
+        0x989896FF, 0x084CC4FF, 0x3032ECFF, 0x5C1EE4FF, 0x8814B0FF, 0xA01464FF, 0x982220FF, 0x783C00FF,
+        0x545A00FF, 0x287200FF, 0x087C00FF, 0x007628FF, 0x006678FF, 0x000000FF, 0x000000FF, 0x000000FF,
+        0xECEEECFF, 0x4C9AECFF, 0x787CECFF, 0xB062ECFF, 0xE454ECFF, 0xEC58B4FF, 0xEC6A64FF, 0xD48820FF,
+        0xA0AA00FF, 0x74C400FF, 0x4CD020FF, 0x38CC6CFF, 0x38B4CCFF, 0x3C3C3CFF, 0x000000FF, 0x000000FF,
+        0xECEEECFF, 0xA8CCECFF, 0xBCBCECFF, 0xD4B2ECFF, 0xECAEECFF, 0xECAED4FF, 0xECB4B0FF, 0xE4C490FF,
+        0xCCD278FF, 0xB4DE78FF, 0xA8E290FF, 0x98E2B4FF, 0xA0D6E4FF, 0xA0A2A0FF, 0x000000FF, 0x000000FF
+    };
+    
     public uint[] GetPalette(byte i)
     {
         uint[] colours = new uint[4];
@@ -474,7 +499,7 @@ public class Ppu
     {
         ushort address = (ushort) (0x3F00 + (palette << 2) + pixel);
         byte index = Read(address);
-        return nesColorPalette[index & 0x3f].ToPackedColor();
+        return palColors[index & 0x3f].ToPackedColor();
     }
 
     private (byte pixel, byte palette) RenderBackground()
@@ -484,7 +509,7 @@ public class Ppu
 
         // Composite current pixel
 
-        ushort bitMux = (ushort) (0x8000 >> FineX);
+        ushort bitMux = (ushort) (0x8000 >> fineX);
 
         byte pixelPlane1 = (byte) ((backgroundPixelLow & bitMux) > 0 ? 1 : 0);
         byte pixelPlane2 = (byte) ((backgroundPixelHigh & bitMux) > 0 ? 1 : 0);
@@ -505,7 +530,7 @@ public class Ppu
             return (0, 0, false, false);
 
         // Composite current pixel
-        for (int i = 0; i < (spriteCount % 9) ; i++)
+        for (int i = 0; i < spriteCount; i++)
         {
             var sprite = sprites[i];
             if (sprite.X != 0)
@@ -538,6 +563,7 @@ public class Ppu
 
     private bool spriteOverflow;
     private bool zeroSpriteHitPossible;
+    
 
     private void ProcessPixels()
     {
@@ -548,8 +574,10 @@ public class Ppu
         if (scanline is -1
             && cycle is 1)
         {
+            ScanlineComplete = false;
             status.VerticalBlank = false;
-            status.SpriteOverflow = spriteOverflow;
+            status.SpriteZeroHit = false;
+            status.SpriteOverflow = false;
             spritePixelLow = new byte[8];
             spritePixelHigh = new byte[8];
         }

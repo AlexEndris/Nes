@@ -101,7 +101,7 @@ public partial class Cpu
             {0xBD, ("LDA", AddressMode.ABX, 4, LDA)},
             {0xB9, ("LDA", AddressMode.ABY, 4, LDA)},
             {0xA1, ("LDA", AddressMode.INX, 6, LDA)},
-            {0xB1, ("LDA", AddressMode.INY, 4, LDA)},
+            {0xB1, ("LDA", AddressMode.INY, 5, LDA)},
             {0xA2, ("LDX", AddressMode.IMM, 2, LDX)},
             {0xA6, ("LDX", AddressMode.ZPG, 3, LDX)},
             {0xB6, ("LDX", AddressMode.ZPY, 4, LDX)},
@@ -460,7 +460,7 @@ public partial class Cpu
         Logger.StartLine(cycleCount);
         Logger.State(this);
         var cyclesToAdd = Execute();
-        Cycles += cyclesToAdd;
+        Cycles += (byte)(cyclesToAdd-1);
         Logger.EndLine();
     }
 

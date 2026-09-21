@@ -2,6 +2,8 @@
 
 namespace Hardware;
 
+using System.Linq;
+
 public class CpuBus : IBus
 {
     public Cartridge Cartridge { get; private set; }
@@ -19,6 +21,7 @@ public class CpuBus : IBus
     public byte DmaAddress;
     public bool DmaTransfer;
     public bool DmaDummy;
+    public bool DmaHalt;
     
     // Set from outside
     public byte[] controllers = new byte[2];
@@ -26,7 +29,8 @@ public class CpuBus : IBus
     private byte[] controllerState = new byte[2];
 
     private byte openBus;
-    
+    private bool strobe;
+
     public CpuBus(Ppu ppu, Apu apu)
     {
         Ppu = ppu;
@@ -58,8 +62,17 @@ public class CpuBus : IBus
 
     private byte GetControllerState(ushort address)
     {
-        byte data = (byte) ((controllerState[address & 0x1] & 0x80) > 0 ? 1 : 0);
-        controllerState[address & 0x1] <<= 1;
+        int i = address & 0x1;
+        if (strobe)
+        {
+            controllerState[i] = controllers[i]; // continuously reloaded
+            return (byte)((controllerState[i] & 0x80) > 0 ? 1 : 0);
+        }
+        
+        byte data = (byte) ((controllerState[i] & 0x80) > 0 ? 1 : 0);
+        
+        controllerState[i] <<= 1;
+        controllerState[i] |= 1; // Fill with ones after the last read
         return data;
     }
 
@@ -93,9 +106,16 @@ public class CpuBus : IBus
                 DmaPage = value;
                 DmaAddress = 0;
                 DmaTransfer = true;
+                DmaHalt = true;
                 break;
             case 0x4016:
-                controllerState[address & 0x1] = controllers[address & 0x1];
+                bool newStrobe = (value & 0x01) != 0;
+                if (newStrobe)
+                {
+                    controllerState[0] = controllers[0];
+                    controllerState[1] = controllers[1];
+                }
+                strobe = newStrobe;
                 break;
             case >= 0x6000:
                 Temp.Span[address & 0x1FFF] = value;

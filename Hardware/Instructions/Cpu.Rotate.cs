@@ -32,6 +32,7 @@ public partial class Cpu
     private byte ROL(Func<ushort> fetch, ushort address)
     {
         ushort value = fetch();
+        Write(address, (byte)value); // dummy write of the unmodified value
         value = value.RotateLeft(Carry);
         SetLeftRotateFlag(value);
         Write(address, (byte) value);
@@ -50,6 +51,7 @@ public partial class Cpu
     {
         byte value = (byte) fetch();
         byte initial = value;
+        Write(address, value); // dummy write of the unmodified value
         value = value.RotateRight(Carry);
         SetRightRotateFlag(initial, value);
         Write(address, value);

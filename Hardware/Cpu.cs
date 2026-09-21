@@ -313,6 +313,73 @@ public partial class Cpu
             
             #region Illegal
 
+            {0x03, ("SLO", AddressMode.INX, 8, SLO)},
+            {0x07, ("SLO", AddressMode.ZPG, 5, SLO)},
+            {0x0F, ("SLO", AddressMode.ABS, 6, SLO)},
+            {0x13, ("SLO", AddressMode.INY, 8, SLO)},
+            {0x17, ("SLO", AddressMode.ZPX, 6, SLO)},
+            {0x1B, ("SLO", AddressMode.ABY, 7, SLO)},
+            {0x1F, ("SLO", AddressMode.ABX, 7, SLO)},
+
+            {0x23, ("RLA", AddressMode.INX, 8, RLA)},
+            {0x27, ("RLA", AddressMode.ZPG, 5, RLA)},
+            {0x2F, ("RLA", AddressMode.ABS, 6, RLA)},
+            {0x33, ("RLA", AddressMode.INY, 8, RLA)},
+            {0x37, ("RLA", AddressMode.ZPX, 6, RLA)},
+            {0x3B, ("RLA", AddressMode.ABY, 7, RLA)},
+            {0x3F, ("RLA", AddressMode.ABX, 7, RLA)},
+            
+            {0x43, ("SRE", AddressMode.INX, 8, SRE)},
+            {0x47, ("SRE", AddressMode.ZPG, 5, SRE)},
+            {0x4F, ("SRE", AddressMode.ABS, 6, SRE)},
+            {0x53, ("SRE", AddressMode.INY, 8, SRE)},
+            {0x57, ("SRE", AddressMode.ZPX, 6, SRE)},
+            {0x5B, ("SRE", AddressMode.ABY, 7, SRE)},
+            {0x5F, ("SRE", AddressMode.ABX, 7, SRE)},
+            
+            {0x63, ("RRA", AddressMode.INX, 8, RRA)},
+            {0x67, ("RRA", AddressMode.ZPG, 5, RRA)},
+            {0x6F, ("RRA", AddressMode.ABS, 6, RRA)},
+            {0x73, ("RRA", AddressMode.INY, 8, RRA)},
+            {0x77, ("RRA", AddressMode.ZPX, 6, RRA)},
+            {0x7B, ("RRA", AddressMode.ABY, 7, RRA)},
+            {0x7F, ("RRA", AddressMode.ABX, 7, RRA)},
+            
+            {0x83, ("SAX", AddressMode.INX, 6, SAX)},
+            {0x87, ("SAX", AddressMode.ZPG, 3, SAX)},
+            {0x8F, ("SAX", AddressMode.ABS, 4, SAX)},
+            {0x97, ("SAX", AddressMode.ZPY, 4, SAX)},
+            
+            {0xA3, ("LAX", AddressMode.INX, 6, LAX)},
+            {0xA7, ("LAX", AddressMode.ZPG, 3, LAX)},
+            {0xAF, ("LAX", AddressMode.ABS, 4, LAX)},
+            {0xB3, ("LAX", AddressMode.INY, 5, LAX)},
+            {0xB7, ("LAX", AddressMode.ZPY, 4, LAX)},
+            {0xBF, ("LAX", AddressMode.ABY, 4, LAX)},
+            
+            {0xC3, ("DCP", AddressMode.INX, 8, DCP)},
+            {0xC7, ("DCP", AddressMode.ZPG, 5, DCP)},
+            {0xCF, ("DCP", AddressMode.ABS, 6, DCP)},
+            {0xD3, ("DCP", AddressMode.INY, 8, DCP)},
+            {0xD7, ("DCP", AddressMode.ZPX, 6, DCP)},
+            {0xDB, ("DCP", AddressMode.ABY, 7, DCP)},
+            {0xDF, ("DCP", AddressMode.ABX, 7, DCP)},
+            
+            {0xE3, ("ISC", AddressMode.INX, 8, ISC)},
+            {0xE7, ("ISC", AddressMode.ZPG, 5, ISC)},
+            {0xEF, ("ISC", AddressMode.ABS, 6, ISC)},
+            {0xF3, ("ISC", AddressMode.INY, 8, ISC)},
+            {0xF7, ("ISC", AddressMode.ZPX, 6, ISC)},
+            {0xFB, ("ISC", AddressMode.ABY, 7, ISC)},
+            {0xFF, ("ISC", AddressMode.ABX, 7, ISC)},
+            
+            {0x93, ("SHA", AddressMode.INY, 6, SHA)},
+            {0x9F, ("SHA", AddressMode.ABY, 5, SHA)},
+            {0x9B, ("SHS", AddressMode.ABY, 5, SHS)},
+            {0x9C, ("SHY", AddressMode.ABX, 5, SHY)},
+            {0x9E, ("SHX", AddressMode.ABY, 5, SHX)},
+            {0xBB, ("LAE", AddressMode.ABY, 7, LAE)},
+            
             {0x0B, ("ANC", AddressMode.IMM, 2, ANC)},
             {0x2B, ("ANC", AddressMode.IMM, 2, ANC)},
             
@@ -323,8 +390,6 @@ public partial class Cpu
             
             {0xAB, ("LXA", AddressMode.IMM, 2, LXA)},
             {0xCB, ("SBX", AddressMode.IMM, 2, SBX)},
-
-            
 
             {0x04, ("NOP*", AddressMode.ZPG, 3, NOP)},
             {0x14, ("NOP*", AddressMode.ZPX, 4, NOP)},

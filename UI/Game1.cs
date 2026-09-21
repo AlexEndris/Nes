@@ -72,6 +72,7 @@ namespace UI
 
             Cartridge cart;
             cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
+            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes");
             //cart = CpuTestRoms();

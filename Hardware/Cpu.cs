@@ -192,10 +192,6 @@ public partial class Cpu
             {0x6E, ("ROR", AddressMode.ABS, 6, ROR)},
             {0x7E, ("ROR", AddressMode.ABX, 7, ROR)},
 
-            // Illegal
-            {0x4B, ("ALR", AddressMode.IMM, 2, ASR)},
-            {0x6B, ("ARR", AddressMode.IMM, 2, ARR)},
-
             #endregion
 
             #region Comparison 12
@@ -250,10 +246,6 @@ public partial class Cpu
 
             {0x24, ("BIT", AddressMode.ZPG, 3, BIT)},
             {0x2C, ("BIT", AddressMode.ABS, 4, BIT)},
-
-            // Illegal
-            {0x0B, ("AAC", AddressMode.IMM, 2, AAC)},
-            {0x2B, ("AAC", AddressMode.IMM, 2, AAC)},
             
             #endregion
 
@@ -283,11 +275,6 @@ public partial class Cpu
             {0x9A, ("TXS", AddressMode.IMP, 2, TXS)},
             {0x98, ("TYA", AddressMode.IMP, 2, TYA)},
                                                
-            // Ilegal
-            {0xAB, ("ATX", AddressMode.IMP, 2, ATX)},
-            {0xCB, ("AXS", AddressMode.IMP, 2, AXS)},
-
-            
             #endregion
 
             #region Stack Operations 4
@@ -322,19 +309,52 @@ public partial class Cpu
 
             {0xEA, ("NOP", AddressMode.IMP, 2, (_,_) => 0)},
             
-            // Illegal
-            {0x1A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x3A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x5A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x7A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0xDA, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0xFA, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
+            #endregion
+            
+            #region Illegal
+
+            {0x0B, ("ANC", AddressMode.IMM, 2, ANC)},
+            {0x2B, ("ANC", AddressMode.IMM, 2, ANC)},
+            
+            {0x4B, ("ALR", AddressMode.IMM, 2, ALR)},
+            {0x6B, ("ARR", AddressMode.IMM, 2, ARR)},
+            
+            {0x8B, ("ANE", AddressMode.IMM, 2, ANE)},
+            
+            {0xAB, ("LXA", AddressMode.IMM, 2, LXA)},
+            {0xCB, ("SBX", AddressMode.IMM, 2, SBX)},
+
+            
+
+            {0x04, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x14, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x34, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x44, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x54, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x64, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x74, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0xD4, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0xF4, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x1A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x3A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x5A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x7A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0xDA, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0xFA, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x0C, ("NOP*", AddressMode.ABS, 4, NOP)},
+            {0x1C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x3C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x5C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x7C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0xDC, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0xFC, ("NOP*", AddressMode.ABX, 4, NOP)},
+
             {0x80, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0x82, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0x89, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0xC2, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0xE2, ("DOP*", AddressMode.IMM, 3, DOP)},
-
+            
             #endregion
         };
     }
@@ -425,12 +445,11 @@ public partial class Cpu
 
         if (!opcodeActions.TryGetValue(opcode, out var entry))
         {
+            return 0;
             throw new Exception("Unhandled opcode: 0x" + opcode.ToString("X2"));
         }
 
         Logger.Op(entry.Name, entry.Mode);
-
-        
         
         (Func<ushort> fetch, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         

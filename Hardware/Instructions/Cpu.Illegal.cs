@@ -4,12 +4,19 @@ namespace Hardware;
 
 public partial class Cpu
 {
+    private const byte MAGIC = 0xFF;
+    
     private byte DOP(Func<ushort> _, ushort __)
     {
         return 0;
     }
+    
+    private byte NOP(Func<ushort> _, ushort __)
+    {
+        return 0;
+    }
 
-    private byte AAC(Func<ushort> fetch, ushort _)
+    private byte ANC(Func<ushort> fetch, ushort _)
     {
         byte value = (byte) fetch();
         A = (byte) (A & value);
@@ -21,7 +28,7 @@ public partial class Cpu
         return 2;
     }
 
-    private byte ASR(Func<ushort> fetch, ushort _)
+    private byte ALR(Func<ushort> fetch, ushort _)
     {
         byte value = (byte) fetch();
         value = (byte) (A & value);
@@ -35,6 +42,19 @@ public partial class Cpu
         return 0;
     }
 
+    private byte ANE(Func<ushort> fetch, ushort _)
+    {
+        byte value = (byte)fetch();
+        byte result = (byte)((A | MAGIC) & X & value);
+
+        A = result;
+            
+        Zero = A == 0;
+        Negative = (A & 0x80) > 0;
+        
+        return 0;
+    }
+    
     private byte ARR(Func<ushort> fetch, ushort _)
     {
         byte value = (byte) fetch();
@@ -49,11 +69,13 @@ public partial class Cpu
         return 0;
     }
 
-    private byte ATX(Func<ushort> fetch, ushort __)
+    private byte LXA(Func<ushort> fetch, ushort __)
     {
         byte value = (byte)fetch();
-        A = value;
-        X = value;
+        byte result = (byte)((A | MAGIC) & value); 
+        
+        A = result;
+        X = result;
 
         Zero = A == 0;
         Negative = (A & 0x80) > 0;
@@ -61,7 +83,7 @@ public partial class Cpu
         return 0;
     }
 
-    private byte AXS(Func<ushort> fetch, ushort __)
+    private byte SBX(Func<ushort> fetch, ushort __)
     {
         byte data = (byte)fetch();
         byte value = (byte) ((A & X) - data);

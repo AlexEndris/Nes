@@ -275,7 +275,7 @@ public class Ppu
         if (cycle is not 340)
             return;
 
-        for (int i = 0; i < spriteCount % 8; i++)
+        for (int i = 0; i < Math.Min(spriteCount, (byte)8); i++)
         {
             var sprite = sprites[i];
 
@@ -329,7 +329,6 @@ public class Ppu
 
         // Lower part
         return (ushort) (sprite.Bank8x16
-                         | ((sprite.TileId8x16 + 1) << 4)
                          | (sprite.TileId8x16 << 4)
                          | (byte) (7 - (scanline - sprite.Y) & 0x7));
     }

@@ -75,9 +75,9 @@ namespace UI
             //cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
-            //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
-            cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
-            cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
+            cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
+            //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
+            //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
 

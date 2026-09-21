@@ -11,7 +11,7 @@ public struct ObjectAttributeEntry
     public byte X = 0xFF;
 
     // Index only for 8x16
-    public ushort Bank8x16 => (ushort) (Id & 0x1 << 12);
+    public ushort Bank8x16 => (ushort) ((Id & 0x1) << 12);
     public byte TileId8x16 => (byte) (Id & 0xFE);
     
     // Attribute

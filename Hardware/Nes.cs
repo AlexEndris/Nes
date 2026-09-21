@@ -123,9 +123,16 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
             return;
         }
 
-        if (CpuBus.DmaDummy && systemClock % 2 == 1)
+        if (CpuBus.DmaHalt)
         {
-            CpuBus.DmaDummy = false;
+            CpuBus.DmaHalt = false;
+            return;
+        }
+        
+        if (CpuBus.DmaDummy)
+        {
+            if (systemClock % 2 == 1)
+                CpuBus.DmaDummy = false;
             return;
         }
 

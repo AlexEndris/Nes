@@ -10,6 +10,8 @@ using Triangle = Hardware.Audio.Triangle;
 
 namespace Hardware;
 
+using System;
+
 public class Apu
 {
     // Pulse 1 is wired differently
@@ -74,9 +76,12 @@ public class Apu
             status += 0b0000_1000; 
         // if (Dmc.Remaining > 0)
         //     status += 0b0001_0000; 
-            
+
         if (frameCounter.Interrupt)
+        {
             status += 0b0100_0000;
+            frameCounter.Interrupt = false;
+        }
         
         // if (Dmc.Interrupt)
         //     status += 0b1000_0000;
@@ -317,6 +322,7 @@ public class Apu
 
     private void HalfFrame()
     {
+        
         Pulse[0].UpdateSweep();
         Pulse[1].UpdateSweep();
         

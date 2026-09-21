@@ -31,6 +31,7 @@ public partial class Cpu
     private byte ASL(Func<ushort> fetch, ushort address)
     {
         ushort value = fetch();
+        Write(address, (byte)value); // dummy write of the unmodified value
         value <<= 1;
         SetLeftShiftFlag(value);
         Write(address, (byte)value);
@@ -49,6 +50,7 @@ public partial class Cpu
     {
         byte data = (byte)fetch();
         byte value = data; 
+        Write(address, value); // dummy write of the unmodified value
         value >>= 1;
         SetRightShiftFlag(data, value);
         Write(address, value);

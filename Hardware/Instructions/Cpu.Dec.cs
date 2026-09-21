@@ -15,6 +15,7 @@ public partial class Cpu
     private byte DEC(Func<ushort> fetch, ushort address)
     {
         byte value = (byte) fetch();
+        Write(address, value); // dummy write of the unmodified value
         value--;
         SetDecFlags(value);
         Write(address, value);

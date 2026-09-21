@@ -24,6 +24,9 @@ public class CpuBus : IBus
     public byte[] controllers = new byte[2];
 
     private byte[] controllerState = new byte[2];
+
+    private byte openBus;
+    
     public CpuBus(Ppu ppu, Apu apu)
     {
         Ppu = ppu;
@@ -38,17 +41,19 @@ public class CpuBus : IBus
     public byte Read(ushort address)
     {
         if (Cartridge.CpuRead(address, out var value))
-            return value;
+            return openBus = value;
 
-        return address switch
+        byte readValue = address switch
         {
             <= 0x1FFF => ram.Span[address & 0x07FF],
             <= 0x3FFF => Ppu.CpuRead((ushort) (address & 0x0007)),
             <= 0x4015 => Apu.CpuRead(address),
             0x4016 or 0x4017 => GetControllerState(address),
             >= 0x6000 => Temp.Span[address & 0x1FFF],
-            _ => 0
+            _ => openBus
         };
+
+        return openBus = readValue;
     }
 
     private byte GetControllerState(ushort address)
@@ -68,9 +73,11 @@ public class CpuBus : IBus
 
     public void Write(ushort address, byte value)
     {
+        openBus = value;
+
         if (Cartridge.CpuWrite(address, value))
             return;
-
+        
         switch (address)
         {
             case <= 0x1FFF:

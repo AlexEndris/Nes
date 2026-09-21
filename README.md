@@ -8,3 +8,9 @@ Get The APU running so I can hear sound and music.
 
 ## Known Bugs
 (At least) In SMB there are some graphical bugs just after the header area of the screen sometimes, and (I think) some issues with sprite overflow. I haven't debugged any of that yet
+
+## Accuracy
+100thCoin provided a nice ROM to check the accuracy here on Github [100thCoin/AccuracyCoin](https://github.com/100thCoin/AccuracyCoin)
+
+Here's my result (after not throwing an exception when hitting an op-code I didn't implement, so the list of zeroes are essentially crashes)
+![Accuracy Table](AccuracyCoin.png)

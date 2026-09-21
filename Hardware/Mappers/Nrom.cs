@@ -32,10 +32,7 @@ public class Nrom : IMapper
 
     public ushort? CpuWrite(ushort address, byte data)
     {
-        if (address < 0x8000) 
-            return null;
-        
-        return (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF));
+        return null;
     }
 
     public bool PpuRead(ushort address, out ushort mappedAddress)

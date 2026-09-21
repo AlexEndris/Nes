@@ -192,10 +192,6 @@ public partial class Cpu
             {0x6E, ("ROR", AddressMode.ABS, 6, ROR)},
             {0x7E, ("ROR", AddressMode.ABX, 7, ROR)},
 
-            // Illegal
-            {0x4B, ("ALR", AddressMode.IMM, 2, ASR)},
-            {0x6B, ("ARR", AddressMode.IMM, 2, ARR)},
-
             #endregion
 
             #region Comparison 12
@@ -250,10 +246,6 @@ public partial class Cpu
 
             {0x24, ("BIT", AddressMode.ZPG, 3, BIT)},
             {0x2C, ("BIT", AddressMode.ABS, 4, BIT)},
-
-            // Illegal
-            {0x0B, ("AAC", AddressMode.IMM, 2, AAC)},
-            {0x2B, ("AAC", AddressMode.IMM, 2, AAC)},
             
             #endregion
 
@@ -283,11 +275,6 @@ public partial class Cpu
             {0x9A, ("TXS", AddressMode.IMP, 2, TXS)},
             {0x98, ("TYA", AddressMode.IMP, 2, TYA)},
                                                
-            // Ilegal
-            {0xAB, ("ATX", AddressMode.IMP, 2, ATX)},
-            {0xCB, ("AXS", AddressMode.IMP, 2, AXS)},
-
-            
             #endregion
 
             #region Stack Operations 4
@@ -322,19 +309,117 @@ public partial class Cpu
 
             {0xEA, ("NOP", AddressMode.IMP, 2, (_,_) => 0)},
             
-            // Illegal
-            {0x1A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x3A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x5A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0x7A, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0xDA, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
-            {0xFA, ("NOP*", AddressMode.IMP, 2, (_,_) => 0)},
+            #endregion
+            
+            #region Illegal
+
+            {0x03, ("SLO", AddressMode.INX, 8, SLO)},
+            {0x07, ("SLO", AddressMode.ZPG, 5, SLO)},
+            {0x0F, ("SLO", AddressMode.ABS, 6, SLO)},
+            {0x13, ("SLO", AddressMode.INY, 8, SLO)},
+            {0x17, ("SLO", AddressMode.ZPX, 6, SLO)},
+            {0x1B, ("SLO", AddressMode.ABY, 7, SLO)},
+            {0x1F, ("SLO", AddressMode.ABX, 7, SLO)},
+
+            {0x23, ("RLA", AddressMode.INX, 8, RLA)},
+            {0x27, ("RLA", AddressMode.ZPG, 5, RLA)},
+            {0x2F, ("RLA", AddressMode.ABS, 6, RLA)},
+            {0x33, ("RLA", AddressMode.INY, 8, RLA)},
+            {0x37, ("RLA", AddressMode.ZPX, 6, RLA)},
+            {0x3B, ("RLA", AddressMode.ABY, 7, RLA)},
+            {0x3F, ("RLA", AddressMode.ABX, 7, RLA)},
+            
+            {0x43, ("SRE", AddressMode.INX, 8, SRE)},
+            {0x47, ("SRE", AddressMode.ZPG, 5, SRE)},
+            {0x4F, ("SRE", AddressMode.ABS, 6, SRE)},
+            {0x53, ("SRE", AddressMode.INY, 8, SRE)},
+            {0x57, ("SRE", AddressMode.ZPX, 6, SRE)},
+            {0x5B, ("SRE", AddressMode.ABY, 7, SRE)},
+            {0x5F, ("SRE", AddressMode.ABX, 7, SRE)},
+            
+            {0x63, ("RRA", AddressMode.INX, 8, RRA)},
+            {0x67, ("RRA", AddressMode.ZPG, 5, RRA)},
+            {0x6F, ("RRA", AddressMode.ABS, 6, RRA)},
+            {0x73, ("RRA", AddressMode.INY, 8, RRA)},
+            {0x77, ("RRA", AddressMode.ZPX, 6, RRA)},
+            {0x7B, ("RRA", AddressMode.ABY, 7, RRA)},
+            {0x7F, ("RRA", AddressMode.ABX, 7, RRA)},
+            
+            {0x83, ("SAX", AddressMode.INX, 6, SAX)},
+            {0x87, ("SAX", AddressMode.ZPG, 3, SAX)},
+            {0x8F, ("SAX", AddressMode.ABS, 4, SAX)},
+            {0x97, ("SAX", AddressMode.ZPY, 4, SAX)},
+            
+            {0xA3, ("LAX", AddressMode.INX, 6, LAX)},
+            {0xA7, ("LAX", AddressMode.ZPG, 3, LAX)},
+            {0xAF, ("LAX", AddressMode.ABS, 4, LAX)},
+            {0xB3, ("LAX", AddressMode.INY, 5, LAX)},
+            {0xB7, ("LAX", AddressMode.ZPY, 4, LAX)},
+            {0xBF, ("LAX", AddressMode.ABY, 4, LAX)},
+            
+            {0xC3, ("DCP", AddressMode.INX, 8, DCP)},
+            {0xC7, ("DCP", AddressMode.ZPG, 5, DCP)},
+            {0xCF, ("DCP", AddressMode.ABS, 6, DCP)},
+            {0xD3, ("DCP", AddressMode.INY, 8, DCP)},
+            {0xD7, ("DCP", AddressMode.ZPX, 6, DCP)},
+            {0xDB, ("DCP", AddressMode.ABY, 7, DCP)},
+            {0xDF, ("DCP", AddressMode.ABX, 7, DCP)},
+            
+            {0xE3, ("ISC", AddressMode.INX, 8, ISC)},
+            {0xE7, ("ISC", AddressMode.ZPG, 5, ISC)},
+            {0xEF, ("ISC", AddressMode.ABS, 6, ISC)},
+            {0xF3, ("ISC", AddressMode.INY, 8, ISC)},
+            {0xF7, ("ISC", AddressMode.ZPX, 6, ISC)},
+            {0xFB, ("ISC", AddressMode.ABY, 7, ISC)},
+            {0xFF, ("ISC", AddressMode.ABX, 7, ISC)},
+            
+            {0x93, ("SHA", AddressMode.INY, 6, SHA)},
+            {0x9F, ("SHA", AddressMode.ABY, 5, SHA)},
+            {0x9B, ("SHS", AddressMode.ABY, 5, SHS)},
+            {0x9C, ("SHY", AddressMode.ABX, 5, SHY)},
+            {0x9E, ("SHX", AddressMode.ABY, 5, SHX)},
+            {0xBB, ("LAE", AddressMode.ABY, 7, LAE)},
+            
+            {0x0B, ("ANC", AddressMode.IMM, 2, ANC)},
+            {0x2B, ("ANC", AddressMode.IMM, 2, ANC)},
+            
+            {0x4B, ("ALR", AddressMode.IMM, 2, ALR)},
+            {0x6B, ("ARR", AddressMode.IMM, 2, ARR)},
+            
+            {0x8B, ("ANE", AddressMode.IMM, 2, ANE)},
+            
+            {0xAB, ("LXA", AddressMode.IMM, 2, LXA)},
+            {0xCB, ("SBX", AddressMode.IMM, 2, SBX)},
+
+            {0x04, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x14, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x34, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x44, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x54, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x64, ("NOP*", AddressMode.ZPG, 3, NOP)},
+            {0x74, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0xD4, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0xF4, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x1A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x3A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x5A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x7A, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0xDA, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0xFA, ("NOP*", AddressMode.IMP, 2, NOP)},
+            {0x0C, ("NOP*", AddressMode.ABS, 4, NOP)},
+            {0x1C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x3C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x5C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x7C, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0xDC, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0xFC, ("NOP*", AddressMode.ABX, 4, NOP)},
+
             {0x80, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0x82, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0x89, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0xC2, ("DOP*", AddressMode.IMM, 3, DOP)},
             {0xE2, ("DOP*", AddressMode.IMM, 3, DOP)},
-
+            
             #endregion
         };
     }
@@ -425,12 +510,11 @@ public partial class Cpu
 
         if (!opcodeActions.TryGetValue(opcode, out var entry))
         {
+            return 0;
             throw new Exception("Unhandled opcode: 0x" + opcode.ToString("X2"));
         }
 
         Logger.Op(entry.Name, entry.Mode);
-
-        
         
         (Func<ushort> fetch, ushort address, byte additionalCycles) = FetchData(entry.Mode);
         

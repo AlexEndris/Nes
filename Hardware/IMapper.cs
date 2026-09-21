@@ -8,8 +8,8 @@ public interface IMapper
     public ushort ChrBanks { get; }
     public bool IsCpuRead(ushort address);
     public bool IsCpuWrite(ushort address);
-    public ushort? CpuRead(ushort address, ref byte data);
-    public ushort? CpuWrite(ushort address, byte data);
+    public int? CpuRead(ushort address);
+    public int? CpuWrite(ushort address, byte data);
     public bool PpuRead(ushort address, out ushort mappedAddress);
     public bool PpuWrite(ushort address, out ushort mappedAddress);
 }

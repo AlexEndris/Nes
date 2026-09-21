@@ -72,9 +72,12 @@ namespace UI
 
             Cartridge cart;
             cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
-            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
-            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
+            cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
+            cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
 
@@ -309,7 +312,7 @@ namespace UI
             _spriteBatch.DrawString(_font, $"Pause: {pause}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"VRAM: {nes.Ppu.VRam}",
+            _spriteBatch.DrawString(_font, $"VRAM: {nes.Ppu.VRam.Raw}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
             _spriteBatch.DrawString(_font, $"NametableX: {nes.Ppu.VRam.NametableX} - NametableY: {nes.Ppu.VRam.NametableY}",
@@ -318,7 +321,7 @@ namespace UI
             _spriteBatch.DrawString(_font, $"CoarseX: {nes.Ppu.VRam.CoarseX}, FineX: {nes.Ppu.FineX} - CoarseY: {nes.Ppu.VRam.CoarseY}, FineY: {nes.Ppu.VRam.FineY}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"TRAM: {nes.Ppu.TRam}",
+            _spriteBatch.DrawString(_font, $"TRAM: {nes.Ppu.TRam.Raw}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
             _spriteBatch.DrawString(_font, $"NametableX: {nes.Ppu.TRam.NametableX} - NametableY: {nes.Ppu.TRam.NametableY}",

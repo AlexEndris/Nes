@@ -1,37 +1,48 @@
 ﻿namespace Hardware.Mappers;
 
-[MapperId(0)]
-public class Nrom : IMapper
+[MapperId(2)]
+public class UxRom : IMapper
 {
     public ushort PrgBanks { get; }
+
     public ushort ChrBanks { get; }
 
-    public Nrom(ushort prgBanks, ushort chrBanks)
+    private byte Register { get; set; } = 0;
+
+    public UxRom(ushort prgBanks, ushort chrBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
     }
-
+    
     public bool IsCpuRead(ushort address)
     {
         return address >= 0x8000;
     }
-
-    public int? CpuRead(ushort address)
-    {
-        if (address < 0x8000)
-            return null;
-        
-        return (ushort) (address & (PrgBanks == 1 ? 0x3FFF : 0x7FFF));
-    }
-
+    
     public bool IsCpuWrite(ushort address)
     {
         return address >= 0x8000;
     }
+    public int? CpuRead(ushort address)
+    {
+        if (address < 0x8000)
+            return null;
+
+        if (address < 0xC000)
+        {
+            return (address & 0x3FFF) | (Register << 14);
+        }
+
+        return (address & 0x3FFF) | ((PrgBanks-1) << 14);
+    }
 
     public int? CpuWrite(ushort address, byte data)
     {
+        if (address < 0x8000)
+            return null;
+
+        Register = (byte)(data & 0xF);
         return null;
     }
 

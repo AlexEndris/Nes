@@ -253,7 +253,7 @@ public partial class Cpu
 
             {0x4C, ("JMP", AddressMode.ABS, 3, JMPAbs)},
             {0x6C, ("JMP", AddressMode.IND, 5, JMPInd)},
-            {0x20, ("JSR", AddressMode.ABS, 6, JSR)},
+            {0x20, ("JSR", AddressMode.IMP, 6, JSR)},
             {0x60, ("RTS", AddressMode.IMP, 6, RTS)},
             {0x90, ("BCC", AddressMode.REL, 2, BCC)},
             {0xB0, ("BCS", AddressMode.REL, 2, BCS)},

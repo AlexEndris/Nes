@@ -19,11 +19,13 @@ public partial class Cpu
         return 0;
     }
 
-    private byte JSR(Func<ushort> _, ushort address)
+    private byte JSR(Func<ushort> _, ushort __)
     {
-        ushort returnAddress = (ushort) (PC - 1);
-        PushToStack(returnAddress);
-        PC = address;
+        byte low = ReadNextProgramByte();
+        PushToStack(PC);
+        byte high = ReadNextProgramByte();
+        
+        PC = high.To16Bit(low);
         return 0;
     }
 

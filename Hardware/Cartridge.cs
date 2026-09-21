@@ -19,7 +19,7 @@ public class Cartridge
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
         PrgMem = prgMem.AsMemory();
-        ChrMem = chrMem.AsMemory();
+        ChrMem = chrBanks == 0 ? new Memory<byte>(new byte[8*1024]) : chrMem.AsMemory();
     }
 
     public bool CpuRead(ushort address, out byte value)
@@ -31,7 +31,7 @@ public class Cartridge
 
         // If the mapped address doesn't get a value, despite the mapper saying
         // it'll handle the mapping, then the mapper already handled the reading as well
-        var mappedAddress = Mapper.CpuRead(address, ref value);
+        var mappedAddress = Mapper.CpuRead(address);
         
         if (mappedAddress.HasValue)
             value = PrgMem.Span[mappedAddress.Value];

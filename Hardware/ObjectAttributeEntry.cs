@@ -5,6 +5,8 @@ namespace Hardware;
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public struct ObjectAttributeEntry
 {
+    public static ObjectAttributeEntry Empty = new ObjectAttributeEntry();
+    
     public byte Y = 0xFF;
     public byte Id = 0xFF;
     public byte Attribute = 0xFF;

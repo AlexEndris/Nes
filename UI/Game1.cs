@@ -71,13 +71,17 @@ namespace UI
             _font = Content.Load<SpriteFont>("fonts/Cascadia");
 
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
-            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
-            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
-            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            cart = Loader.LoadFromFile(@"..\..\..\mario.nes"); // NRom
+            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes"); // NRom
+            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
+            
             //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
+
+            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
 

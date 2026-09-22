@@ -6,6 +6,7 @@ public interface IMapper
 {
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
+    public ushort PrgRamBanks { get; }
     public bool IsCpuRead(ushort address);
     public bool IsCpuWrite(ushort address);
     public int? CpuRead(ushort address);

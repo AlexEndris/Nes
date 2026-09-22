@@ -4,15 +4,16 @@
 public class UxRom : IMapper
 {
     public ushort PrgBanks { get; }
-
     public ushort ChrBanks { get; }
+    public ushort PrgRamBanks { get; }
 
-    private byte Register { get; set; } = 0;
+    private byte Register { get; set; }
 
-    public UxRom(ushort prgBanks, ushort chrBanks)
+    public UxRom(ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
+        PrgRamBanks = prgRamBanks;
     }
     
     public bool IsCpuRead(ushort address)

@@ -6,20 +6,18 @@ namespace Hardware;
 public class Cartridge
 {
     public IMapper Mapper { get; }
-    public ushort PrgBanks { get; }
-    public ushort ChrBanks { get; }
     public Memory<byte> PrgMem { get; }
     public Memory<byte> ChrMem { get; }
+    public Memory<byte> PrgRam { get; }
     public Mirroring Mirroring { get; } 
     
-    public Cartridge(Mirroring mirroring, IMapper mapper, ushort prgBanks, byte[] prgMem, ushort chrBanks, byte[] chrMem)
+    public Cartridge(Mirroring mirroring, IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
     {
         Mirroring = mirroring;
         Mapper = mapper;
-        PrgBanks = prgBanks;
-        ChrBanks = chrBanks;
         PrgMem = prgMem.AsMemory();
-        ChrMem = chrBanks == 0 ? new Memory<byte>(new byte[8*1024]) : chrMem.AsMemory();
+        ChrMem = chrMem.AsMemory();
+        PrgRam = prgRam.AsMemory();
     }
 
     public bool CpuRead(ushort address, out byte value)

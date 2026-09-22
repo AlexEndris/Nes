@@ -1,15 +1,17 @@
 ﻿namespace Hardware.Mappers;
 
 [MapperId(0)]
-public class Nrom : IMapper
+public class NRom : IMapper
 {
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
+    public ushort PrgRamBanks { get; }
 
-    public Nrom(ushort prgBanks, ushort chrBanks)
+    public NRom(ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
+        PrgRamBanks = prgRamBanks;
     }
 
     public bool IsCpuRead(ushort address)

@@ -26,7 +26,7 @@ public partial class Cpu
         byte value = (byte) fetch();
         A &= value;
         SetBitwiseFlags(A);
-        return 0;
+        return 1;
     }
 
     private byte ORA(Func<ushort> fetch, ushort _)
@@ -34,7 +34,7 @@ public partial class Cpu
         byte value = (byte) fetch();
         A |= value;
         SetBitwiseFlags(A);
-        return 0;
+        return 1;
     }
 
     private byte EOR(Func<ushort> fetch, ushort _)
@@ -42,7 +42,7 @@ public partial class Cpu
         byte value = (byte) fetch();
         A ^= value;
         SetBitwiseFlags(A);
-        return 0;
+        return 1;
     }
 
     private byte BIT(Func<ushort> fetch, ushort _)

@@ -21,6 +21,7 @@ public partial class Cpu
 
         SetFlagsForSBC(A, value, sum);
         A = (byte)sum;
-        return 0;
+        
+        return 1;
     }
 }

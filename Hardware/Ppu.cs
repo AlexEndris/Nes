@@ -115,7 +115,7 @@ public class Ppu
             case 0:
                 control = value;
                 tram.NametableX = (byte) (control.Nametable & 0x01);
-                tram.NametableY = (byte) ((control.Nametable & 0x10) >> 1);
+                tram.NametableY = (byte) ((control.Nametable & 0x02) >> 1);
                 break;
             case 1:
                 mask = value;
@@ -135,8 +135,8 @@ public class Ppu
                 }
                 else
                 {
-                    tram.FineY = (byte) (data & 0x07);
-                    tram.CoarseY = (byte) (data >> 3);
+                    tram.FineY = (byte) (value & 0x07);
+                    tram.CoarseY = (byte) (value >> 3);
                     addressLatch = false;
                 }
                 break;
@@ -185,7 +185,7 @@ public class Ppu
     
     
     private byte spriteCount = 0;
-    private ObjectAttributeEntry[] sprites = new ObjectAttributeEntry[8];
+    private readonly ObjectAttributeEntry[] sprites = new ObjectAttributeEntry[8];
     private byte[] spritePixelLow = new byte[8];
     private byte[] spritePixelHigh = new byte[8];
 
@@ -197,6 +197,7 @@ public class Ppu
             case -1 or 261: // Pre-Render
             case >= 0 and < 240: // Render
                 ProcessPixels();
+                ResetOamAddress();
                 SpriteEvaluation();
                 SpriteFetching();
                 break;
@@ -278,7 +279,7 @@ public class Ppu
         for (int i = 0; i < Math.Min(spriteCount, (byte)8); i++)
         {
             var sprite = sprites[i];
-
+            
             ushort addressLow = !control.SpriteSize
                 ? GetSpriteAddress8x8(sprite)
                 : GetSpriteAddress8x16(sprite);
@@ -340,13 +341,13 @@ public class Ppu
             // Normal Orientation
             return (ushort) ((control.SpriteTableBase << 12)
                              | (sprite.Id << 4)
-                             | (scanline - sprite.Y));
+                             | ((scanline - sprite.Y) & 0x7));
         }
 
         // Flipped
         return (ushort) ((control.SpriteTableBase << 12)
                          | (sprite.Id << 4)
-                         | (7 - (scanline - sprite.Y)));
+                         | ((7 - (scanline - sprite.Y)) & 0x7));
     }
 
     private void SpriteEvaluation()
@@ -355,11 +356,22 @@ public class Ppu
             || scanline < 0)
             return;
         
-        sprites = new ObjectAttributeEntry[8];
-        spriteCount = 0;
+        if (!ShowBackground && !ShowSprite)
+            return;
 
-        for (int i = 0; i < 64; i++)
+        for (int i = 0; i < 8; i++)
         {
+            sprites[i] = ObjectAttributeEntry.Empty;
+        }
+        spriteCount = 0;
+        zeroSpriteHitPossible = false;
+
+        int start = oamAddr / 4;
+        
+        for (int n = 0; n < 64; n++)
+        {
+            int i = (start + n) & 63;
+            
             var sprite = OAM.Span[i];
             short diff = (short) (scanline - sprite.Y);
 
@@ -373,7 +385,7 @@ public class Ppu
                 break;
             }
 
-            if (i == 0)
+            if (n == 0)
             {
                 // zero sprite hit?
                 zeroSpriteHitPossible = true;
@@ -629,6 +641,15 @@ public class Ppu
             TransferTempY();
     }
 
+    private void ResetOamAddress()
+    {
+        if (!ShowBackground && !ShowSprite)
+            return;
+
+        if (cycle is >= 257 and <= 320)
+            oamAddr = 0;
+    }
+    
     private void SetNextPatternHigh()
     {
         // load next pattern high bits

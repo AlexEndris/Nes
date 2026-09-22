@@ -42,9 +42,9 @@ public class Loader
         var chrMem = header.ChrRomBanks == 0 ? new byte[8*1024] : reader.ReadBytes(header.ChrRomSize);
         var prgRam = new byte[header.PrgRamSize];
         
-        var mapper = CreateMapper(header.MapperId, header.PrgRomBanks, header.ChrRomBanks, header.PrgRamBanks);
+        var mapper = CreateMapper(header.MapperId, header.Flags6.Mirroring, header.PrgRomBanks, header.ChrRomBanks, header.PrgRamBanks);
             
-        return new Cartridge(header.Flags6.Mirroring, mapper, prgMem, chrMem, prgRam);
+        return new Cartridge(mapper, prgMem, chrMem, prgRam);
     }
 
     private static Cartridge LoadNes2(BinaryReader reader, Nes2 header)
@@ -53,18 +53,18 @@ public class Loader
         var chrMem = header.ChrRomBanks == 0 ? new byte[header.ChrRamSize] : reader.ReadBytes(header.ChrRomSize);
         var prgRam = new byte[header.PrgRamSize];
 
-        var mapper = CreateMapper(header.MapperId, header.PrgRomBanks, header.ChrRomBanks, header.PrgRamBanks);
+        var mapper = CreateMapper(header.MapperId, header.Flags6.Mirroring, header.PrgRomBanks, header.ChrRomBanks, header.PrgRamBanks);
             
-        return new Cartridge(header.Flags6.Mirroring, mapper, prgMem, chrMem, prgRam);
+        return new Cartridge(mapper, prgMem, chrMem, prgRam);
     }
 
-    private static IMapper CreateMapper(ushort id, ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
+    private static IMapper CreateMapper(ushort id, Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
     {
         var mappers = typeof(IMapper).Assembly.GetTypes()
             .Where(t => typeof(IMapper).IsAssignableFrom(t) && !t.IsInterface);
 
         var mapper = mappers.Single(t => t.GetCustomAttribute<MapperIdAttribute>().MapperId == id);
 
-        return (IMapper) Activator.CreateInstance(mapper, prgBanks, chrBanks, prgRamBanks);
+        return (IMapper) Activator.CreateInstance(mapper, mirroring, prgBanks, chrBanks, prgRamBanks);
     }
 }

@@ -2,12 +2,17 @@
 
 using System;
 
+using Headers;
+
 [MapperId(1)]
 public class Mmc1 : IMapper
 {
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
     public ushort PrgRamBanks { get; }
+
+    // TODO: This needs to change but the startup one should be there too.
+    public Mirroring Mirroring { get; }
 
     private byte ControlRegister { get; set; }
     private byte ChrBank0Register { get; set; }
@@ -16,11 +21,12 @@ public class Mmc1 : IMapper
     
     private byte ShiftRegister { get; set; }
 
-    public Mmc1(ushort prgBanks, ushort chrBanks,  ushort prgRamBanks)
+    public Mmc1(Mirroring mirroring, ushort prgBanks, ushort chrBanks,  ushort prgRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
         PrgRamBanks = prgRamBanks;
+        Mirroring = mirroring;
         
         ControlRegister = 0xC;
         ResetShiftRegister();

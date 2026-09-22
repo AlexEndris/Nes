@@ -76,10 +76,10 @@ namespace UI
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
             
             //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
-            //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
+            cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
 
-            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
             
             //cart = CpuTestRoms();

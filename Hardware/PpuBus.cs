@@ -28,7 +28,7 @@ public class PpuBus : IBus
         if (address is >= 0x2000 and < 0x3EFF)
         {
             address &= 0xFFF;
-            switch (Cartridge.Mirroring)
+            switch (Cartridge.Mapper.Mirroring)
             {
                 case Mirroring.Vertical:
                     switch (address)
@@ -87,7 +87,7 @@ public class PpuBus : IBus
         else if (address is >= 0x2000 and < 0x3EFF)
         {
             address &= 0xFFF;
-            switch (Cartridge.Mirroring)
+            switch (Cartridge.Mapper.Mirroring)
             {
                 case Mirroring.Vertical:
                     switch (address)

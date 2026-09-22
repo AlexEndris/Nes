@@ -9,11 +9,9 @@ public class Cartridge
     public Memory<byte> PrgMem { get; }
     public Memory<byte> ChrMem { get; }
     public Memory<byte> PrgRam { get; }
-    public Mirroring Mirroring { get; } 
     
-    public Cartridge(Mirroring mirroring, IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
+    public Cartridge(IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
     {
-        Mirroring = mirroring;
         Mapper = mapper;
         PrgMem = prgMem.AsMemory();
         ChrMem = chrMem.AsMemory();

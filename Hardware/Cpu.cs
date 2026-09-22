@@ -145,7 +145,6 @@ public partial class Cpu
             {0x71, ("ADC", AddressMode.INY, 5, ADC)},
 
             {0xE9, ("SBC", AddressMode.IMM, 2, SBC)},
-            {0xEB, ("SBC*", AddressMode.IMM, 2, SBC)},
             {0xE5, ("SBC", AddressMode.ZPG, 3, SBC)},
             {0xF5, ("SBC", AddressMode.ZPX, 4, SBC)},
             {0xED, ("SBC", AddressMode.ABS, 4, SBC)},
@@ -253,7 +252,7 @@ public partial class Cpu
 
             {0x4C, ("JMP", AddressMode.ABS, 3, JMPAbs)},
             {0x6C, ("JMP", AddressMode.IND, 5, JMPInd)},
-            {0x20, ("JSR", AddressMode.IMP, 6, JSR)},
+            {0x20, ("JSR", AddressMode.IMP, 6, JSR)}, // IMP Deliberately, even though it's ABS. It just fetches the address itself
             {0x60, ("RTS", AddressMode.IMP, 6, RTS)},
             {0x90, ("BCC", AddressMode.REL, 2, BCC)},
             {0xB0, ("BCS", AddressMode.REL, 2, BCS)},
@@ -266,7 +265,7 @@ public partial class Cpu
 
             #endregion
 
-            #region Transfer 6
+            #region Transfer 6x
 
             {0xAA, ("TAX", AddressMode.IMP, 2, TAX)},
             {0xA8, ("TAY", AddressMode.IMP, 2, TAY)},
@@ -307,12 +306,14 @@ public partial class Cpu
 
             #region No Operation 1
 
-            {0xEA, ("NOP", AddressMode.IMP, 2, (_,_) => 0)},
+            {0xEA, ("NOP", AddressMode.IMP, 2, NOP)},
             
             #endregion
             
-            #region Illegal
+            #region Illegal 93
 
+            {0xEB, ("SBC*", AddressMode.IMM, 2, SBC)},
+            
             {0x03, ("SLO", AddressMode.INX, 8, SLO)},
             {0x07, ("SLO", AddressMode.ZPG, 5, SLO)},
             {0x0F, ("SLO", AddressMode.ABS, 6, SLO)},
@@ -378,7 +379,7 @@ public partial class Cpu
             {0x9B, ("SHS", AddressMode.ABY, 5, SHS)},
             {0x9C, ("SHY", AddressMode.ABX, 5, SHY)},
             {0x9E, ("SHX", AddressMode.ABY, 5, SHX)},
-            {0xBB, ("LAE", AddressMode.ABY, 7, LAE)},
+            {0xBB, ("LAE", AddressMode.ABY, 4, LAE)},
             
             {0x0B, ("ANC", AddressMode.IMM, 2, ANC)},
             {0x2B, ("ANC", AddressMode.IMM, 2, ANC)},
@@ -391,34 +392,34 @@ public partial class Cpu
             {0xAB, ("LXA", AddressMode.IMM, 2, LXA)},
             {0xCB, ("SBX", AddressMode.IMM, 2, SBX)},
 
-            {0x04, ("NOP*", AddressMode.ZPG, 3, NOP)},
-            {0x14, ("NOP*", AddressMode.ZPX, 4, NOP)},
-            {0x34, ("NOP*", AddressMode.ZPX, 4, NOP)},
-            {0x44, ("NOP*", AddressMode.ZPG, 3, NOP)},
-            {0x54, ("NOP*", AddressMode.ZPX, 4, NOP)},
-            {0x64, ("NOP*", AddressMode.ZPG, 3, NOP)},
-            {0x74, ("NOP*", AddressMode.ZPX, 4, NOP)},
-            {0xD4, ("NOP*", AddressMode.ZPX, 4, NOP)},
-            {0xF4, ("NOP*", AddressMode.ZPX, 4, NOP)},
+            {0x04, ("NOP*", AddressMode.ZPG, 3, MemNOP)},
+            {0x14, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
+            {0x34, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
+            {0x44, ("NOP*", AddressMode.ZPG, 3, MemNOP)},
+            {0x54, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
+            {0x64, ("NOP*", AddressMode.ZPG, 3, MemNOP)},
+            {0x74, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
+            {0xD4, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
+            {0xF4, ("NOP*", AddressMode.ZPX, 4, MemNOP)},
             {0x1A, ("NOP*", AddressMode.IMP, 2, NOP)},
             {0x3A, ("NOP*", AddressMode.IMP, 2, NOP)},
             {0x5A, ("NOP*", AddressMode.IMP, 2, NOP)},
             {0x7A, ("NOP*", AddressMode.IMP, 2, NOP)},
             {0xDA, ("NOP*", AddressMode.IMP, 2, NOP)},
             {0xFA, ("NOP*", AddressMode.IMP, 2, NOP)},
-            {0x0C, ("NOP*", AddressMode.ABS, 4, NOP)},
-            {0x1C, ("NOP*", AddressMode.ABX, 4, NOP)},
-            {0x3C, ("NOP*", AddressMode.ABX, 4, NOP)},
-            {0x5C, ("NOP*", AddressMode.ABX, 4, NOP)},
-            {0x7C, ("NOP*", AddressMode.ABX, 4, NOP)},
-            {0xDC, ("NOP*", AddressMode.ABX, 4, NOP)},
-            {0xFC, ("NOP*", AddressMode.ABX, 4, NOP)},
+            {0x0C, ("NOP*", AddressMode.ABS, 4, MemNOP)},
+            {0x1C, ("NOP*", AddressMode.ABX, 4, MemNOP)},
+            {0x3C, ("NOP*", AddressMode.ABX, 4, MemNOP)},
+            {0x5C, ("NOP*", AddressMode.ABX, 4, MemNOP)},
+            {0x7C, ("NOP*", AddressMode.ABX, 4, MemNOP)},
+            {0xDC, ("NOP*", AddressMode.ABX, 4, MemNOP)},
+            {0xFC, ("NOP*", AddressMode.ABX, 4, MemNOP)},
 
-            {0x80, ("DOP*", AddressMode.IMM, 3, DOP)},
-            {0x82, ("DOP*", AddressMode.IMM, 3, DOP)},
-            {0x89, ("DOP*", AddressMode.IMM, 3, DOP)},
-            {0xC2, ("DOP*", AddressMode.IMM, 3, DOP)},
-            {0xE2, ("DOP*", AddressMode.IMM, 3, DOP)},
+            {0x80, ("DOP*", AddressMode.IMM, 2, DOP)},
+            {0x82, ("DOP*", AddressMode.IMM, 2, DOP)},
+            {0x89, ("DOP*", AddressMode.IMM, 2, DOP)},
+            {0xC2, ("DOP*", AddressMode.IMM, 2, DOP)},
+            {0xE2, ("DOP*", AddressMode.IMM, 2, DOP)},
             
             #endregion
         };

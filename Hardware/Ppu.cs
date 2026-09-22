@@ -115,7 +115,7 @@ public class Ppu
             case 0:
                 control = value;
                 tram.NametableX = (byte) (control.Nametable & 0x01);
-                tram.NametableY = (byte) ((control.Nametable & 0x10) >> 1);
+                tram.NametableY = (byte) ((control.Nametable & 0x02) >> 1);
                 break;
             case 1:
                 mask = value;
@@ -135,8 +135,8 @@ public class Ppu
                 }
                 else
                 {
-                    tram.FineY = (byte) (data & 0x07);
-                    tram.CoarseY = (byte) (data >> 3);
+                    tram.FineY = (byte) (value & 0x07);
+                    tram.CoarseY = (byte) (value >> 3);
                     addressLatch = false;
                 }
                 break;
@@ -278,7 +278,7 @@ public class Ppu
         for (int i = 0; i < Math.Min(spriteCount, (byte)8); i++)
         {
             var sprite = sprites[i];
-
+            
             ushort addressLow = !control.SpriteSize
                 ? GetSpriteAddress8x8(sprite)
                 : GetSpriteAddress8x16(sprite);
@@ -340,13 +340,13 @@ public class Ppu
             // Normal Orientation
             return (ushort) ((control.SpriteTableBase << 12)
                              | (sprite.Id << 4)
-                             | (scanline - sprite.Y));
+                             | ((scanline - sprite.Y) & 0x7));
         }
 
         // Flipped
         return (ushort) ((control.SpriteTableBase << 12)
                          | (sprite.Id << 4)
-                         | (7 - (scanline - sprite.Y)));
+                         | ((7 - (scanline - sprite.Y)) & 0x7));
     }
 
     private void SpriteEvaluation()

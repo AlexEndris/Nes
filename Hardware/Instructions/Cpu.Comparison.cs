@@ -19,7 +19,7 @@ public partial class Cpu
     {
         byte value = (byte) fetch();
         SetFlagsForCmp(A, value);
-        return 0;
+        return 1;
     }
 
     private byte CPX(Func<ushort> fetch, ushort _)

@@ -16,6 +16,12 @@ public partial class Cpu
         return 0;
     }
 
+    private byte MemNOP(Func<ushort> fetch, ushort __)
+    {
+        fetch();
+        return 1;
+    }
+
     private byte ANC(Func<ushort> fetch, ushort _)
     {
         byte value = (byte) fetch();
@@ -263,6 +269,6 @@ public partial class Cpu
         SP = A = X = (byte)(value & SP);
         SetLoadFlag(A);
         
-        return 0;   
+        return 1;   
     }
 }

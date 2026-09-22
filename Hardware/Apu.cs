@@ -14,12 +14,14 @@ using System;
 
 public class Apu
 {
-    public CpuBus CpuBus { get; set; }
+    public Func<ushort, byte> Reader { get; set; }
     
     // Pulse 1 is wired differently
     public SquarePulse[] Pulse { get; } = {new() {OnesComplement = true}, new()};
     public Triangle Triangle { get; } = new();
     public Noise Noise { get; } = new();
+    public Dmc Dmc { get; } = new();
+    
 
     private FrameCounter frameCounter = new();
     private uint cycle;
@@ -242,6 +244,7 @@ public class Apu
 
         Triangle.Clock();
         Noise.Clock();
+        Dmc.Clock(Reader);
         
         double sample = MixSamples();
         sample = Filters.Process(sample);

@@ -35,6 +35,7 @@ public class CpuBus : IBus
     {
         Ppu = ppu;
         Apu = apu;
+        Apu.Reader = Read;
     }
 
     public void Insert(Cartridge cartridge)

@@ -20,6 +20,7 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
         Ppu = new Ppu(PpuBus, this);
         Apu = new Apu();
         CpuBus = new CpuBus(Ppu, Apu);
+        Apu.CpuBus = CpuBus;
         screen = new uint[Width * Height];
         Cpu = new Cpu(CpuBus);
     }

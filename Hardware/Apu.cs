@@ -14,6 +14,8 @@ using System;
 
 public class Apu
 {
+    public CpuBus CpuBus { get; set; }
+    
     // Pulse 1 is wired differently
     public SquarePulse[] Pulse { get; } = {new() {OnesComplement = true}, new()};
     public Triangle Triangle { get; } = new();

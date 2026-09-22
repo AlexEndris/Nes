@@ -6,15 +6,15 @@ namespace Hardware;
 public class Cartridge
 {
     public IMapper Mapper { get; }
-    public Memory<byte> PrgMem { get; }
-    public Memory<byte> ChrMem { get; }
+    public Memory<byte> PrgRom { get; }
+    public Memory<byte> ChrRom { get; }
     public Memory<byte> PrgRam { get; }
     
     public Cartridge(IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
     {
         Mapper = mapper;
-        PrgMem = prgMem.AsMemory();
-        ChrMem = chrMem.AsMemory();
+        PrgRom = prgMem.AsMemory();
+        ChrRom = chrMem.AsMemory();
         PrgRam = prgRam.AsMemory();
     }
 
@@ -30,7 +30,7 @@ public class Cartridge
         var mappedAddress = Mapper.CpuRead(address);
         
         if (mappedAddress.HasValue)
-            value = PrgMem.Span[mappedAddress.Value];
+            value = PrgRom.Span[mappedAddress.Value];
         
         return true;
     }
@@ -45,7 +45,7 @@ public class Cartridge
         var mappedAddress = Mapper.CpuWrite(address, value);
         
         if (mappedAddress.HasValue)
-            PrgMem.Span[mappedAddress.Value] = value;
+            PrgRom.Span[mappedAddress.Value] = value;
         
         return true;
     }
@@ -54,7 +54,7 @@ public class Cartridge
     {
         if (Mapper.PpuRead(address, out var mappedAddress))
         {
-            value = ChrMem.Span[mappedAddress];
+            value = ChrRom.Span[mappedAddress];
             return true;
         }
 
@@ -67,7 +67,7 @@ public class Cartridge
         if (!Mapper.PpuWrite(address, out var mappedAddress))
             return false;
 
-        ChrMem.Span[mappedAddress] = value;
+        ChrRom.Span[mappedAddress] = value;
         return true;
     }
 }

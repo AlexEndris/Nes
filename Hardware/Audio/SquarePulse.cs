@@ -16,11 +16,9 @@ public class SquarePulse
 
     public LengthCounter Counter { get; } = new();
     public Envelope Envelope { get; } = new();
+    public Timer Timer { get; } = new();
 
-    private ushort period;
     private byte sequence;
-    
-    public ushort PeriodReload { get; set; }
     
     public ushort GetSample()
     {
@@ -29,7 +27,7 @@ public class SquarePulse
 
         ushort target = TargetPeriod;
 
-        if (target > 0x7FF || PeriodReload < 8)
+        if (target > 0x7FF || Timer.PeriodReload < 8)
             return 0;
         
         ushort sample = (ushort) ((dutyCycleLookup[DutyCycleIndex] >> sequence) & 0x1);
@@ -39,13 +37,11 @@ public class SquarePulse
 
     public void Clock()
     {
-        if (period != 0)
+        if (!Timer.Clock())
         {
-            period--;
             return;
         }
         
-        period = PeriodReload;
         if (sequence != 0)
         {
             sequence--;
@@ -64,24 +60,24 @@ public class SquarePulse
     public bool OnesComplement { get; set; }
     public bool SweepReload { get; set; }
  
-    public byte divider;
+    private byte divider;
    
     public ushort TargetPeriod
     {
         get
         {
-            ushort change = (ushort) (PeriodReload >> SweepShift);
+            ushort change = (ushort) (Timer.PeriodReload >> SweepShift);
 
             if (!SweepNegate)
-                return (ushort) (PeriodReload + change);
+                return (ushort) (Timer.PeriodReload + change);
 
             if (!OnesComplement)
-                return (ushort) (PeriodReload - change);
+                return (ushort) (Timer.PeriodReload - change);
 
-            if (SweepShift == 0 || PeriodReload == 0)
+            if (SweepShift == 0 || Timer.PeriodReload == 0)
                 return 0 ;
 
-            return (ushort) (PeriodReload - change - 1);
+            return (ushort) (Timer.PeriodReload - change - 1);
         }
     }
 
@@ -93,8 +89,8 @@ public class SquarePulse
             && divider == 0
             && SweepShift != 0
             && target <= 0x7FF
-            && PeriodReload >= 8)
-            PeriodReload = target;
+            && Timer.PeriodReload >= 8)
+            Timer.PeriodReload = target;
 
         if (divider != 0
             && !SweepReload)

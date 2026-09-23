@@ -4,10 +4,8 @@ public class Triangle
 {
     public LengthCounter Counter { get; } = new();
     public LinearCounter Linear { get; } = new();
+    public Timer Timer { get; } = new();
 
-    public ushort PeriodReload { get; set; }
-    
-    private ushort period;
     private byte sequence;
     
     private byte[] sequenceLookup = {
@@ -17,7 +15,7 @@ public class Triangle
     
     public ushort GetSample()
     {
-        if (PeriodReload <= 2)
+        if (Timer.PeriodReload <= 2)
             return 0;
 
         return sequenceLookup[sequence];
@@ -29,13 +27,10 @@ public class Triangle
             || Linear.Value == 0)
             return;
 
-        if (period != 0)
+        if (!Timer.Clock())
         {
-            period--;
             return;
         }
-
-        period = PeriodReload;
 
         if (sequence >= 31)
         {

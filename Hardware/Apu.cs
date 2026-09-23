@@ -110,16 +110,33 @@ public class Apu
             case <= 0x400F:
                 WriteNoise((ushort) (address & 0x3), value);
                 break;
-            case <= 0x4013:
+            case 0x4010:
+                bool irqEnabled = (value & 0x80) > 0;
+                Dmc.IrqEnabled = irqEnabled;
+                Dmc.Irq = Dmc.Irq && irqEnabled; 
+                
+                bool loopEnabled = (value & 0x40) > 0;
+                byte rateIndex = (byte)(value & 0x0F);
+                
+                // TODO: set these on DMC
+                
+                break;
+            case 0x4011:
+                byte outputLevel = (byte)(value & 0x7F);
+                break;
+            case 0x4012:
+                ushort sampleAddress = (ushort)((value << 6) | 0xC000);
+                break;
+            case 0x4013:
+                ushort sampleLength = (ushort)((value << 4) + 1);
                 break;
             case 0x4015:
-                Pulse[0].Counter.Enabled = (value & 0b0001) != 0;
-                Pulse[1].Counter.Enabled = (value & 0b0010) != 0;
-                Triangle.Counter.Enabled = (value & 0b0100) != 0;
-                Noise.Counter.Enabled = (value & 0b1000) != 0;
-                //Dmc.Enabled = (value & 0b1_0000) != 0;
-                // TODO some other DMC related stuff
-                //Dmc.Interrupt = false;
+                Pulse[0].Counter.Enabled = (value & 0x1) != 0;
+                Pulse[1].Counter.Enabled = (value & 0x2) != 0;
+                Triangle.Counter.Enabled = (value & 0x4) != 0;
+                Noise.Counter.Enabled = (value & 0x8) != 0;
+                Dmc.Enabled = (value & 0x10) != 0;
+                Dmc.Irq = false;
                 break;
             case 0x4017:
                 frameCounter.FiveStepMode = (value & 0x80) > 0;
@@ -176,10 +193,10 @@ public class Apu
                 // Unused
                 break;
             case 2:
-                Triangle.PeriodReload = (ushort) ((Triangle.PeriodReload & 0x700) | value);
+                Triangle.Timer.PeriodReload = (ushort) ((Triangle.Timer.PeriodReload & 0x700) | value);
                 break;
             case 3:
-                Triangle.PeriodReload = (ushort) ((Triangle.PeriodReload & 0xFF) | ((value & 0x7) << 8));
+                Triangle.Timer.PeriodReload = (ushort) ((Triangle.Timer.PeriodReload & 0xFF) | ((value & 0x7) << 8));
                 Triangle.Counter.Load((byte) (value >> 3));
 
                 Triangle.Linear.Reload = true;
@@ -222,10 +239,10 @@ public class Apu
                 pulse.SweepReload = true;
                 break;
             case 2:
-                pulse.PeriodReload = (ushort) ((pulse.PeriodReload & 0x700) | value);
+                pulse.Timer.PeriodReload = (ushort) ((pulse.Timer.PeriodReload & 0x700) | value);
                 break;
             case 3:
-                pulse.PeriodReload = (ushort) ((pulse.PeriodReload & 0xFF) | ((value & 0x7) << 8));
+                pulse.Timer.PeriodReload = (ushort) ((pulse.Timer.PeriodReload & 0xFF) | ((value & 0x7) << 8));
                 pulse.Counter.Load((byte) (value >> 3));
                 break;
         }
@@ -255,20 +272,15 @@ public class Apu
 
     private void Downsample(double sample)
     {
-        rawSampleBuffer.Add(sample);
         if (cycle < nextSampleAt)
             return;
-        
-        //var downSampled = rawSampleBuffer.Average();
        
-        rawSampleBuffer.Clear();
         sampleBuffer.Add(sample);
         nextSampleAt = (uint) ((generatedSamples + 1) * ((float)cpuClock / sampleRate));
         generatedSamples++;
     }
 
-    private List<double> rawSampleBuffer = new(50);
-    private List<double> sampleBuffer;
+    private readonly List<double> sampleBuffer;
     
     public bool HasSamples()
     {
@@ -306,7 +318,7 @@ public class Apu
         ushort pulse2 = Pulse[1].GetSample();
         ushort triangle = Triangle.GetSample(); 
         ushort noise = Noise.GetSample(); 
-        ushort dmc = 0;
+        ushort dmc = Dmc.GetSample();
 
         int combinedPulse = pulse1 + pulse2;
         double pulseOut = 0.00752 * combinedPulse;

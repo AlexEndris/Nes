@@ -4,6 +4,7 @@ public class Noise
 {
     public Envelope Envelope { get; } = new();
     public LengthCounter Counter { get; } = new();
+    public Timer Timer { get; } = new();
     public bool Mode { get; set; }
     public ushort PeriodReload { get; set; }
     
@@ -17,7 +18,7 @@ public class Noise
 
     public void Load(byte value)
     {
-        PeriodReload = periodLookup[value];
+        Timer.PeriodReload = (ushort)(periodLookup[value] - 1);
     }
     
     public ushort GetSample()
@@ -32,13 +33,10 @@ public class Noise
     
     public void Clock()
     {
-        if (period != 0)
+        if (!Timer.Clock())
         {
-            period--;
             return;
         }
-
-        period = (ushort) (PeriodReload - 1);
 
         int feedback = shift & 0b1;
 

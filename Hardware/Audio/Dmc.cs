@@ -18,7 +18,7 @@ public class Dmc
 
     public bool IrqEnabled { get; set; }
 
-    public bool Irq { get; set; }
+    public bool Interrupt { get; set; }
 
     public ushort SampleAddress { get; set; }
 
@@ -33,7 +33,7 @@ public class Dmc
     // Reader
     private ushort CurrentAddress { get; set; }
 
-    private ushort BytesRemaining { get; set; }
+    public ushort BytesRemaining { get; private set; }
 
     // Output
     public byte OutputLevel { get; set; }
@@ -155,7 +155,7 @@ public class Dmc
         }
         else if (IrqEnabled)
         {
-            Irq = true;
+            Interrupt = true;
         }
     }
 

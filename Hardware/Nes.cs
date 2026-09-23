@@ -111,6 +111,8 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
             Cpu.TriggerNonMaskableInterrupt();
         }
 
+        Cpu.SetInterruptState(Apu.Interrupt);
+
         systemClock++;
     }
 

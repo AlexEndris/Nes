@@ -18,9 +18,10 @@ public class Apu
     public Triangle Triangle { get; } = new();
     public Noise Noise { get; } = new();
     public Dmc Dmc { get; } = new();
+    public FrameCounter FrameCounter { get; } = new();
     
-
-    private FrameCounter frameCounter = new();
+    public bool Interrupt { get { return Dmc.Interrupt || FrameCounter.Interrupt; } }
+    
     private uint cycle;
     
     private uint cpuClock = 1_789_773;
@@ -38,7 +39,7 @@ public class Apu
         
         InitializeFilters();
     }
-
+    
     private void InitializeFilters()
     {
         // Downsample a bit to not be too computational involved
@@ -68,24 +69,24 @@ public class Apu
         byte status = 0;
 
         if (Pulse[0].Counter.Value > 0)
-            status += 0b0000_0001; 
+            status += 0x1; 
         if (Pulse[1].Counter.Value > 0)
-            status += 0b0000_0010; 
+            status += 0x2; 
         if (Triangle.Counter.Value > 0)
-            status += 0b0000_0100; 
+            status += 0x4; 
         if (Noise.Counter.Value > 0)
-            status += 0b0000_1000; 
-        // if (Dmc.Remaining > 0)
-        //     status += 0b0001_0000; 
+            status += 0x8; 
+        if (Dmc.BytesRemaining > 0)
+            status += 0x10; 
 
-        if (frameCounter.Interrupt)
+        if (FrameCounter.Interrupt)
         {
-            status += 0b0100_0000;
-            frameCounter.Interrupt = false;
+            status += 0x40;
+            FrameCounter.Interrupt = false;
         }
         
-        // if (Dmc.Interrupt)
-        //     status += 0b1000_0000;
+        if (Dmc.Interrupt)
+            status += 0x80;
         
         
         return status;
@@ -110,7 +111,7 @@ public class Apu
             case 0x4010:
                 bool irqEnabled = (value & 0x80) > 0;
                 Dmc.IrqEnabled = irqEnabled;
-                Dmc.Irq = Dmc.Irq && irqEnabled; 
+                Dmc.Interrupt = Dmc.Interrupt && irqEnabled; 
                 Dmc.Loop = (value & 0x40) > 0;
                 Dmc.SetRate((byte)(value & 0x0F));
                 break;
@@ -129,12 +130,12 @@ public class Apu
                 Triangle.Counter.Enabled = (value & 0x4) != 0;
                 Noise.Counter.Enabled = (value & 0x8) != 0;
                 Dmc.SetState((value & 0x10) != 0);
-                Dmc.Irq = false;
+                Dmc.Interrupt = false;
                 break;
             case 0x4017:
-                frameCounter.FiveStepMode = (value & 0x80) > 0;
-                frameCounter.DisableInterrupt = (value & 0x40) > 0;
-                frameCounter.ResetDelay = (byte)((cycle & 0x1) != 0 ? 3 : 4); 
+                FrameCounter.FiveStepMode = (value & 0x80) > 0;
+                FrameCounter.DisableInterrupt = (value & 0x40) > 0;
+                FrameCounter.ResetDelay = (byte)((cycle & 0x1) != 0 ? 3 : 4); 
                 break;
         }
     }
@@ -243,8 +244,7 @@ public class Apu
 
     public void Clock()
     {
-        frameCounter.Clock(QuarterFrame, HalfFrame);
-        // TODO clock channels
+        FrameCounter.Clock(QuarterFrame, HalfFrame);
         
         if ((cycle & 0x1) == 0)
         {

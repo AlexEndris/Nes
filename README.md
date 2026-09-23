@@ -12,5 +12,5 @@ Extend the APU and fix the PPU bugs.
 ## Accuracy
 100thCoin provided a nice ROM to check the accuracy here on Github [100thCoin/AccuracyCoin](https://github.com/100thCoin/AccuracyCoin)
 
-Here's my result:
+Here's my result (Test 19.4 is skipped because it affects other tests for me currently):
 ![Accuracy Table](AccuracyCoin.png)

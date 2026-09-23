@@ -42,7 +42,6 @@ public class PpuBus : IBus
                         case <= 0x0FFF:
                             return nameTables[(address & 0x3FF) | 0x400];
                     }
-
                     break;
                 case Mirroring.Horizontal:
                     switch (address)
@@ -56,8 +55,11 @@ public class PpuBus : IBus
                         case <= 0x0FFF:
                             return nameTables[(address & 0x3FF) | 0x400];
                     }
-
                     break;
+                case Mirroring.OneScreenA:
+                    return nameTables[address & 0x3FF];
+                case Mirroring.OneScreenB:
+                    return nameTables[(address & 0x3FF) | 0x400];
             }
         }
         
@@ -105,7 +107,6 @@ public class PpuBus : IBus
                             nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                     }
-
                     break;
                 case Mirroring.Horizontal:
                     switch (address)
@@ -123,7 +124,12 @@ public class PpuBus : IBus
                             nameTables[(address & 0x3FF) | 0x400] = value;
                             break;
                     }
-
+                    break;
+                case Mirroring.OneScreenA:
+                    nameTables[address & 0x3FF] = value;
+                    break;
+                case Mirroring.OneScreenB:
+                    nameTables[(address & 0x3FF) | 0x400] = value;
                     break;
             }
         }            

@@ -8,15 +8,18 @@ public class UxRom : IMapper
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
     public ushort PrgRamBanks { get; }
+    public ushort ChrRamBanks { get; }
     public Mirroring Mirroring { get; }
-    
+    public bool PrgRamEnabled { get; } = false;
+
     private byte Register { get; set; }
 
-    public UxRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
+    public UxRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
         PrgRamBanks = prgRamBanks;
+        ChrRamBanks = chrRamBanks;
         Mirroring = mirroring;
     }
     

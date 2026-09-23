@@ -8,13 +8,17 @@ public class NRom : IMapper
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
     public ushort PrgRamBanks { get; }
+    public ushort ChrRamBanks { get; }
     public Mirroring Mirroring { get; }
 
-    public NRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks)
+    public bool PrgRamEnabled { get; } = false;
+
+    public NRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
         PrgRamBanks = prgRamBanks;
+        ChrRamBanks = chrRamBanks;
         Mirroring = mirroring;
     }
 

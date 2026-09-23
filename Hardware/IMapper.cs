@@ -9,7 +9,9 @@ public interface IMapper
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
     public ushort PrgRamBanks { get; }
+    public ushort ChrRamBanks { get; }
     public Mirroring Mirroring { get; }
+    public bool PrgRamEnabled { get; }
     public bool IsCpuRead(ushort address);
     public bool IsCpuWrite(ushort address);
     public int? CpuRead(ushort address);

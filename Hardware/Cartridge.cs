@@ -24,6 +24,15 @@ public class Cartridge
         if (!Mapper.IsCpuRead(address))
             return false;
 
+        if (address is >= 0x6000 and <= 0x7FFF)
+        {
+            if (! Mapper.PrgRamEnabled)
+                return false;
+            
+            // TODO: Access RAM
+            return true;
+        }
+        
         // If the mapped address doesn't get a value, despite the mapper saying
         // it'll handle the mapping, then the mapper already handled the reading as well
         var mappedAddress = Mapper.CpuRead(address);

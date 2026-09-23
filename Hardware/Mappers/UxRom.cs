@@ -1,18 +1,26 @@
 ﻿namespace Hardware.Mappers;
 
+using Headers;
+
 [MapperId(2)]
 public class UxRom : IMapper
 {
     public ushort PrgBanks { get; }
-
     public ushort ChrBanks { get; }
+    public ushort PrgRamBanks { get; }
+    public ushort ChrRamBanks { get; }
+    public Mirroring Mirroring { get; }
+    public bool PrgRamEnabled { get; } = false;
 
-    private byte Register { get; set; } = 0;
+    private byte Register { get; set; }
 
-    public UxRom(ushort prgBanks, ushort chrBanks)
+    public UxRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
+        PrgRamBanks = prgRamBanks;
+        ChrRamBanks = chrRamBanks;
+        Mirroring = mirroring;
     }
     
     public bool IsCpuRead(ushort address)

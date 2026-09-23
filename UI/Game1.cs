@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Mime;
-using System.Text;
+
 using Hardware;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using static System.Double;
 
 namespace UI
 {
@@ -71,13 +67,17 @@ namespace UI
             _font = Content.Load<SpriteFont>("fonts/Cascadia");
 
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
-            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
-            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
-            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            cart = Loader.LoadFromFile(@"..\..\..\mario.nes"); // NRom
+            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes"); // NRom
+            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
+            
             //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
+
+            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
 
@@ -164,7 +164,7 @@ namespace UI
             _framesPerSecond = 1.0 / _timePerFrame.TotalSeconds;
             var frameTime = _timePerFrame.TotalMilliseconds;
             
-            //UpdateDebug();
+            UpdateDebug();
             
             previousState = Keyboard.GetState();
             advanceScanline = false;

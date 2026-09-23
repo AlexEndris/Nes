@@ -2,20 +2,14 @@
 
 namespace Hardware;
 
-using System.Linq;
-
 public class CpuBus : IBus
 {
     public Cartridge Cartridge { get; private set; }
     public Ppu Ppu { get; }
     public Apu Apu { get; }
 
-    private Memory<byte> ram = new(new byte[0x800]);
+    public Memory<byte> Ram { get; } = new(new byte[0x800]);
 
-    public Memory<byte> Temp = new(new byte[0x2000]);
-    
-    public Memory<byte> Ram => ram;
-    
     public byte DmaData;
     public byte DmaPage;
     public byte DmaAddress;
@@ -35,6 +29,7 @@ public class CpuBus : IBus
     {
         Ppu = ppu;
         Apu = apu;
+        Apu.Reader = Read;
     }
 
     public void Insert(Cartridge cartridge)
@@ -49,11 +44,10 @@ public class CpuBus : IBus
 
         byte readValue = address switch
         {
-            <= 0x1FFF => ram.Span[address & 0x07FF],
+            <= 0x1FFF => Ram.Span[address & 0x07FF],
             <= 0x3FFF => Ppu.CpuRead((ushort) (address & 0x0007)),
             <= 0x4015 => Apu.CpuRead(address),
             0x4016 or 0x4017 => GetControllerState(address),
-            >= 0x6000 => Temp.Span[address & 0x1FFF],
             _ => openBus
         };
 
@@ -94,7 +88,7 @@ public class CpuBus : IBus
         switch (address)
         {
             case <= 0x1FFF:
-                ram.Span[address & 0x07FF] = value;
+                Ram.Span[address & 0x07FF] = value;
                 break;
             case <= 0x3FFF:
                 Ppu.CpuWrite((ushort) (address & 0x0007), value);
@@ -116,9 +110,6 @@ public class CpuBus : IBus
                     controllerState[1] = controllers[1];
                 }
                 strobe = newStrobe;
-                break;
-            case >= 0x6000:
-                Temp.Span[address & 0x1FFF] = value;
                 break;
         }
     }

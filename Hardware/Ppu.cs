@@ -25,6 +25,7 @@ public class Ppu
     // Mask
     private bool ShowBackground => (mask & 0x8) > 0;
     private bool ShowBackgroundLeft => (mask & 0x2) > 0;
+
     private bool ShowSprite => (mask & 0x10) > 0;
     private bool ShowSpriteLeft => (mask & 0x4) > 0;
 
@@ -42,7 +43,7 @@ public class Ppu
     public bool FrameComplete { get; set; }
     public bool ScanlineComplete { get; set; }
 
-    public Memory<ObjectAttributeEntry> OAM = new(new ObjectAttributeEntry[64]);
+    public Memory<ObjectAttributeEntry> Oam = new(new ObjectAttributeEntry[64]);
 
     public Ppu(IBus bus, IPixelBuffer buffer)
     {
@@ -125,6 +126,7 @@ public class Ppu
                 break;
             case 4:
                 SetOamByte(oamAddr, value);
+                oamAddr++;
                 break;
             case 5:
                 if (!addressLatch)
@@ -164,13 +166,13 @@ public class Ppu
 
     public void SetOamByte(byte address, byte value)
     {
-        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(OAM.Span);
+        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(Oam.Span);
         byteMemory[address] = value;
     }
 
     private byte GetOamByte()
     {
-        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(OAM.Span);
+        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(Oam.Span);
         return byteMemory[oamAddr];
     }
 
@@ -212,9 +214,17 @@ public class Ppu
         var (bgPixel, bgPalette) = RenderBackground();
         var (fgPixel, fgPalette, fgPriority, spriteZero) = RenderForeground();
 
+        if (cycle <= 8)
+        {
+            if (!ShowBackgroundLeft)
+                bgPixel = 0;
+            if (!ShowSpriteLeft)
+                fgPixel = 0;
+        }
+        
         var (pixel, palette) = ChoosePixel(bgPixel, fgPixel, fgPalette, bgPalette, fgPriority, spriteZero);
 
-        if (cycle is > 0 and < 256
+        if (cycle is > 0 and < 257
             && scanline is >= 0 and < 240)
         {
             var colour = GetColourFromPalette(palette, pixel);
@@ -243,9 +253,6 @@ public class Ppu
 
         if (bgPixel > 0 && fgPixel == 0)
             return (bgPixel, bgPalette);
-
-        if (bgPixel <= 0 || fgPixel <= 0) 
-            return (0, 0);
         
         if (!zeroSpriteHitPossible 
             || !spriteZero
@@ -352,8 +359,7 @@ public class Ppu
 
     private void SpriteEvaluation()
     {
-        if (cycle != 257
-            || scanline < 0)
+        if (cycle != 257)
             return;
         
         if (!ShowBackground && !ShowSprite)
@@ -366,13 +372,16 @@ public class Ppu
         spriteCount = 0;
         zeroSpriteHitPossible = false;
 
-        int start = oamAddr / 4;
+        if (scanline < 0)
+            return;
         
+        int start = oamAddr / 4;
+
         for (int n = 0; n < 64; n++)
         {
             int i = (start + n) & 63;
             
-            var sprite = OAM.Span[i];
+            var sprite = Oam.Span[i];
             short diff = (short) (scanline - sprite.Y);
 
             if (diff < 0
@@ -391,7 +400,7 @@ public class Ppu
                 zeroSpriteHitPossible = true;
             }
 
-            sprites[spriteCount] = OAM.Span[i];
+            sprites[spriteCount] = Oam.Span[i];
             spriteCount++;
         }
     }
@@ -474,7 +483,7 @@ public class Ppu
         
         for (int i = 0; i < 64; i++)
         {
-            var sprite = OAM.Span[i];
+            var sprite = Oam.Span[i];
             var palette = (byte)((sprite.Attribute & 0x3) + 0x4);
             ushort offset = (ushort) (sprite.Id << 4);
 

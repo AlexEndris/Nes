@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Hardware;
 
@@ -17,9 +16,9 @@ public partial class Cpu
     private bool irq;
     private bool nmi;
 
-    public void TriggerInterrupt()
+    public void SetInterruptState(bool state)
     {
-        irq = true;
+        irq = state;
     }
 
     public void TriggerNonMaskableInterrupt()
@@ -502,7 +501,6 @@ public partial class Cpu
 
         PC = Bus.Read16Bit(0xFFFE);
         Cycles = 7;
-        irq = false;
     }
 
     private byte Execute()
@@ -511,7 +509,6 @@ public partial class Cpu
 
         if (!opcodeActions.TryGetValue(opcode, out var entry))
         {
-            return 0;
             throw new Exception("Unhandled opcode: 0x" + opcode.ToString("X2"));
         }
 

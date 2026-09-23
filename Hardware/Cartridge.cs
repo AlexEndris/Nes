@@ -1,25 +1,20 @@
 ﻿using System;
-using Hardware.Headers;
 
 namespace Hardware;
 
 public class Cartridge
 {
     public IMapper Mapper { get; }
-    public ushort PrgBanks { get; }
-    public ushort ChrBanks { get; }
-    public Memory<byte> PrgMem { get; }
-    public Memory<byte> ChrMem { get; }
-    public Mirroring Mirroring { get; } 
+    public Memory<byte> PrgRom { get; }
+    public Memory<byte> ChrRom { get; }
+    public Memory<byte> PrgRam { get; }
     
-    public Cartridge(Mirroring mirroring, IMapper mapper, ushort prgBanks, byte[] prgMem, ushort chrBanks, byte[] chrMem)
+    public Cartridge(IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
     {
-        Mirroring = mirroring;
         Mapper = mapper;
-        PrgBanks = prgBanks;
-        ChrBanks = chrBanks;
-        PrgMem = prgMem.AsMemory();
-        ChrMem = chrBanks == 0 ? new Memory<byte>(new byte[8*1024]) : chrMem.AsMemory();
+        PrgRom = prgMem.AsMemory();
+        ChrRom = chrMem.AsMemory();
+        PrgRam = prgRam.AsMemory();
     }
 
     public bool CpuRead(ushort address, out byte value)
@@ -29,12 +24,21 @@ public class Cartridge
         if (!Mapper.IsCpuRead(address))
             return false;
 
+        if (address is >= 0x6000 and <= 0x7FFF)
+        {
+            if (!Mapper.PrgRamEnabled)
+                return false;
+
+            value = PrgRam.Span[(address & 0x1FFF)];
+            return true;
+        }
+        
         // If the mapped address doesn't get a value, despite the mapper saying
         // it'll handle the mapping, then the mapper already handled the reading as well
         var mappedAddress = Mapper.CpuRead(address);
         
         if (mappedAddress.HasValue)
-            value = PrgMem.Span[mappedAddress.Value];
+            value = PrgRom.Span[mappedAddress.Value];
         
         return true;
     }
@@ -44,12 +48,21 @@ public class Cartridge
         if (!Mapper.IsCpuWrite(address))
             return false;
         
+        if (address is >= 0x6000 and <= 0x7FFF)
+        {
+            if (!Mapper.PrgRamEnabled)
+                return false;
+
+            PrgRam.Span[(address & 0x1FFF)] = value;
+            return true;
+        }
+        
         // If the mapped address doesn't get a value, despite the mapper saying
         // it'll handle the mapping, then the mapper already handled the writing as well
         var mappedAddress = Mapper.CpuWrite(address, value);
         
         if (mappedAddress.HasValue)
-            PrgMem.Span[mappedAddress.Value] = value;
+            PrgRom.Span[mappedAddress.Value] = value;
         
         return true;
     }
@@ -58,7 +71,7 @@ public class Cartridge
     {
         if (Mapper.PpuRead(address, out var mappedAddress))
         {
-            value = ChrMem.Span[mappedAddress];
+            value = ChrRom.Span[mappedAddress];
             return true;
         }
 
@@ -70,8 +83,8 @@ public class Cartridge
     {
         if (!Mapper.PpuWrite(address, out var mappedAddress))
             return false;
-
-        ChrMem.Span[mappedAddress] = value;
+        
+        ChrRom.Span[mappedAddress] = value;
         return true;
     }
 }

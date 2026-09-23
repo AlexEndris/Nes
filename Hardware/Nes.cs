@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 
 namespace Hardware;
 
@@ -111,6 +110,8 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
             Ppu.ResetNonMaskableInterrupt();
             Cpu.TriggerNonMaskableInterrupt();
         }
+
+        Cpu.SetInterruptState(Apu.Interrupt);
 
         systemClock++;
     }

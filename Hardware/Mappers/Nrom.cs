@@ -1,15 +1,25 @@
 ﻿namespace Hardware.Mappers;
 
+using Headers;
+
 [MapperId(0)]
-public class Nrom : IMapper
+public class NRom : IMapper
 {
     public ushort PrgBanks { get; }
     public ushort ChrBanks { get; }
+    public ushort PrgRamBanks { get; }
+    public ushort ChrRamBanks { get; }
+    public Mirroring Mirroring { get; }
 
-    public Nrom(ushort prgBanks, ushort chrBanks)
+    public bool PrgRamEnabled { get; } = false;
+
+    public NRom(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
     {
         PrgBanks = prgBanks;
         ChrBanks = chrBanks;
+        PrgRamBanks = prgRamBanks;
+        ChrRamBanks = chrRamBanks;
+        Mirroring = mirroring;
     }
 
     public bool IsCpuRead(ushort address)

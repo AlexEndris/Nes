@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
+
 using Hardware.Audio;
 using Hardware.Audio.Filters;
-using SharpDX.Direct2D1;
-using SharpDX.Direct2D1.Effects;
-using static System.Math;
+
 using Triangle = Hardware.Audio.Triangle;
 
 namespace Hardware;
@@ -14,12 +11,17 @@ using System;
 
 public class Apu
 {
+    public Func<ushort, byte> Reader { get; set; }
+    
     // Pulse 1 is wired differently
     public SquarePulse[] Pulse { get; } = {new() {OnesComplement = true}, new()};
     public Triangle Triangle { get; } = new();
     public Noise Noise { get; } = new();
-
-    private FrameCounter frameCounter = new();
+    public Dmc Dmc { get; } = new();
+    public FrameCounter FrameCounter { get; } = new();
+    
+    public bool Interrupt { get { return Dmc.Interrupt || FrameCounter.Interrupt; } }
+    
     private uint cycle;
     
     private uint cpuClock = 1_789_773;
@@ -37,7 +39,7 @@ public class Apu
         
         InitializeFilters();
     }
-
+    
     private void InitializeFilters()
     {
         // Downsample a bit to not be too computational involved
@@ -67,24 +69,24 @@ public class Apu
         byte status = 0;
 
         if (Pulse[0].Counter.Value > 0)
-            status += 0b0000_0001; 
+            status += 0x1; 
         if (Pulse[1].Counter.Value > 0)
-            status += 0b0000_0010; 
+            status += 0x2; 
         if (Triangle.Counter.Value > 0)
-            status += 0b0000_0100; 
+            status += 0x4; 
         if (Noise.Counter.Value > 0)
-            status += 0b0000_1000; 
-        // if (Dmc.Remaining > 0)
-        //     status += 0b0001_0000; 
+            status += 0x8; 
+        if (Dmc.BytesRemaining > 0)
+            status += 0x10; 
 
-        if (frameCounter.Interrupt)
+        if (FrameCounter.Interrupt)
         {
-            status += 0b0100_0000;
-            frameCounter.Interrupt = false;
+            status += 0x40;
+            FrameCounter.Interrupt = false;
         }
         
-        // if (Dmc.Interrupt)
-        //     status += 0b1000_0000;
+        if (Dmc.Interrupt)
+            status += 0x80;
         
         
         return status;
@@ -106,21 +108,34 @@ public class Apu
             case <= 0x400F:
                 WriteNoise((ushort) (address & 0x3), value);
                 break;
-            case <= 0x4013:
+            case 0x4010:
+                bool irqEnabled = (value & 0x80) > 0;
+                Dmc.IrqEnabled = irqEnabled;
+                Dmc.Interrupt = Dmc.Interrupt && irqEnabled; 
+                Dmc.Loop = (value & 0x40) > 0;
+                Dmc.SetRate((byte)(value & 0x0F));
+                break;
+            case 0x4011:
+                Dmc.OutputLevel = (byte)(value & 0x7F);
+                break;
+            case 0x4012:
+                Dmc.SampleAddress = (ushort)((value << 6) | 0xC000);
+                break;
+            case 0x4013:
+                Dmc.SampleLength = (ushort)((value << 4) + 1);
                 break;
             case 0x4015:
-                Pulse[0].Counter.Enabled = (value & 0b0001) != 0;
-                Pulse[1].Counter.Enabled = (value & 0b0010) != 0;
-                Triangle.Counter.Enabled = (value & 0b0100) != 0;
-                Noise.Counter.Enabled = (value & 0b1000) != 0;
-                //Dmc.Enabled = (value & 0b1_0000) != 0;
-                // TODO some other DMC related stuff
-                //Dmc.Interrupt = false;
+                Pulse[0].Counter.Enabled = (value & 0x1) != 0;
+                Pulse[1].Counter.Enabled = (value & 0x2) != 0;
+                Triangle.Counter.Enabled = (value & 0x4) != 0;
+                Noise.Counter.Enabled = (value & 0x8) != 0;
+                Dmc.SetState((value & 0x10) != 0);
+                Dmc.Interrupt = false;
                 break;
             case 0x4017:
-                frameCounter.FiveStepMode = (value & 0x80) > 0;
-                frameCounter.DisableInterrupt = (value & 0x40) > 0;
-                frameCounter.ResetDelay = (byte)((cycle & 0x1) != 0 ? 3 : 4); 
+                FrameCounter.FiveStepMode = (value & 0x80) > 0;
+                FrameCounter.DisableInterrupt = (value & 0x40) > 0;
+                FrameCounter.ResetDelay = (byte)((cycle & 0x1) != 0 ? 3 : 4); 
                 break;
         }
     }
@@ -172,10 +187,10 @@ public class Apu
                 // Unused
                 break;
             case 2:
-                Triangle.PeriodReload = (ushort) ((Triangle.PeriodReload & 0x700) | value);
+                Triangle.Timer.PeriodReload = (ushort) ((Triangle.Timer.PeriodReload & 0x700) | value);
                 break;
             case 3:
-                Triangle.PeriodReload = (ushort) ((Triangle.PeriodReload & 0xFF) | ((value & 0x7) << 8));
+                Triangle.Timer.PeriodReload = (ushort) ((Triangle.Timer.PeriodReload & 0xFF) | ((value & 0x7) << 8));
                 Triangle.Counter.Load((byte) (value >> 3));
 
                 Triangle.Linear.Reload = true;
@@ -218,10 +233,10 @@ public class Apu
                 pulse.SweepReload = true;
                 break;
             case 2:
-                pulse.PeriodReload = (ushort) ((pulse.PeriodReload & 0x700) | value);
+                pulse.Timer.PeriodReload = (ushort) ((pulse.Timer.PeriodReload & 0x700) | value);
                 break;
             case 3:
-                pulse.PeriodReload = (ushort) ((pulse.PeriodReload & 0xFF) | ((value & 0x7) << 8));
+                pulse.Timer.PeriodReload = (ushort) ((pulse.Timer.PeriodReload & 0xFF) | ((value & 0x7) << 8));
                 pulse.Counter.Load((byte) (value >> 3));
                 break;
         }
@@ -229,8 +244,7 @@ public class Apu
 
     public void Clock()
     {
-        frameCounter.Clock(QuarterFrame, HalfFrame);
-        // TODO clock channels
+        FrameCounter.Clock(QuarterFrame, HalfFrame);
         
         if ((cycle & 0x1) == 0)
         {
@@ -240,6 +254,7 @@ public class Apu
 
         Triangle.Clock();
         Noise.Clock();
+        Dmc.Clock(Reader);
         
         double sample = MixSamples();
         sample = Filters.Process(sample);
@@ -250,20 +265,15 @@ public class Apu
 
     private void Downsample(double sample)
     {
-        rawSampleBuffer.Add(sample);
         if (cycle < nextSampleAt)
             return;
-        
-        //var downSampled = rawSampleBuffer.Average();
        
-        rawSampleBuffer.Clear();
         sampleBuffer.Add(sample);
-        nextSampleAt = (uint) ((generatedSamples + 1) * ((float)cpuClock / sampleRate));
         generatedSamples++;
+        nextSampleAt = (uint) (generatedSamples * ((float)cpuClock / sampleRate));
     }
 
-    private List<double> rawSampleBuffer = new(50);
-    private List<double> sampleBuffer;
+    private readonly List<double> sampleBuffer;
     
     public bool HasSamples()
     {
@@ -301,7 +311,7 @@ public class Apu
         ushort pulse2 = Pulse[1].GetSample();
         ushort triangle = Triangle.GetSample(); 
         ushort noise = Noise.GetSample(); 
-        ushort dmc = 0;
+        ushort dmc = Dmc.GetSample();
 
         int combinedPulse = pulse1 + pulse2;
         double pulseOut = 0.00752 * combinedPulse;

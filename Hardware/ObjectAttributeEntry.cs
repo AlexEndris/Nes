@@ -2,7 +2,7 @@
 
 namespace Hardware;
 
-[StructLayout(LayoutKind.Sequential, Size = 4)]
+[StructLayout(LayoutKind.Sequential, Size = 4, Pack = 1)]
 public struct ObjectAttributeEntry
 {
     public static ObjectAttributeEntry Empty = new ObjectAttributeEntry();

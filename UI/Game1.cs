@@ -71,11 +71,11 @@ namespace UI
             cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes"); // NRom
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
             
-            cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
+            //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
 
-            //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
             
             //cart = CpuTestRoms();
@@ -164,7 +164,7 @@ namespace UI
             _framesPerSecond = 1.0 / _timePerFrame.TotalSeconds;
             var frameTime = _timePerFrame.TotalMilliseconds;
             
-            //UpdateDebug();
+            UpdateDebug();
             
             previousState = Keyboard.GetState();
             advanceScanline = false;

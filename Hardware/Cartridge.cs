@@ -26,10 +26,10 @@ public class Cartridge
 
         if (address is >= 0x6000 and <= 0x7FFF)
         {
-            if (! Mapper.PrgRamEnabled)
+            if (!Mapper.PrgRamEnabled)
                 return false;
-            
-            // TODO: Access RAM
+
+            value = PrgRam.Span[(address & 0x1FFF)];
             return true;
         }
         
@@ -47,6 +47,15 @@ public class Cartridge
     {
         if (!Mapper.IsCpuWrite(address))
             return false;
+        
+        if (address is >= 0x6000 and <= 0x7FFF)
+        {
+            if (!Mapper.PrgRamEnabled)
+                return false;
+
+            PrgRam.Span[(address & 0x1FFF)] = value;
+            return true;
+        }
         
         // If the mapped address doesn't get a value, despite the mapper saying
         // it'll handle the mapping, then the mapper already handled the writing as well
@@ -74,7 +83,7 @@ public class Cartridge
     {
         if (!Mapper.PpuWrite(address, out var mappedAddress))
             return false;
-
+        
         ChrRom.Span[mappedAddress] = value;
         return true;
     }

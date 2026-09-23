@@ -61,7 +61,7 @@ public class Mmc1 : IMapper
 
     public bool IsCpuWrite(ushort address)
     {
-        return address >= 0x8000;
+        return address >= 0x6000;
     }
 
     public int? CpuRead(ushort address)

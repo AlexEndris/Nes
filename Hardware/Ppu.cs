@@ -25,6 +25,7 @@ public class Ppu
     // Mask
     private bool ShowBackground => (mask & 0x8) > 0;
     private bool ShowBackgroundLeft => (mask & 0x2) > 0;
+
     private bool ShowSprite => (mask & 0x10) > 0;
     private bool ShowSpriteLeft => (mask & 0x4) > 0;
 
@@ -42,7 +43,7 @@ public class Ppu
     public bool FrameComplete { get; set; }
     public bool ScanlineComplete { get; set; }
 
-    public Memory<ObjectAttributeEntry> OAM = new(new ObjectAttributeEntry[64]);
+    public Memory<ObjectAttributeEntry> Oam = new(new ObjectAttributeEntry[64]);
 
     public Ppu(IBus bus, IPixelBuffer buffer)
     {
@@ -125,6 +126,7 @@ public class Ppu
                 break;
             case 4:
                 SetOamByte(oamAddr, value);
+                oamAddr++;
                 break;
             case 5:
                 if (!addressLatch)
@@ -164,13 +166,13 @@ public class Ppu
 
     public void SetOamByte(byte address, byte value)
     {
-        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(OAM.Span);
+        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(Oam.Span);
         byteMemory[address] = value;
     }
 
     private byte GetOamByte()
     {
-        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(OAM.Span);
+        var byteMemory = MemoryMarshal.Cast<ObjectAttributeEntry, byte>(Oam.Span);
         return byteMemory[oamAddr];
     }
 
@@ -357,8 +359,7 @@ public class Ppu
 
     private void SpriteEvaluation()
     {
-        if (cycle != 257
-            || scanline < 0)
+        if (cycle != 257)
             return;
         
         if (!ShowBackground && !ShowSprite)
@@ -371,13 +372,16 @@ public class Ppu
         spriteCount = 0;
         zeroSpriteHitPossible = false;
 
-        int start = oamAddr / 4;
+        if (scanline < 0)
+            return;
         
+        int start = oamAddr / 4;
+
         for (int n = 0; n < 64; n++)
         {
             int i = (start + n) & 63;
             
-            var sprite = OAM.Span[i];
+            var sprite = Oam.Span[i];
             short diff = (short) (scanline - sprite.Y);
 
             if (diff < 0
@@ -396,7 +400,7 @@ public class Ppu
                 zeroSpriteHitPossible = true;
             }
 
-            sprites[spriteCount] = OAM.Span[i];
+            sprites[spriteCount] = Oam.Span[i];
             spriteCount++;
         }
     }
@@ -479,7 +483,7 @@ public class Ppu
         
         for (int i = 0; i < 64; i++)
         {
-            var sprite = OAM.Span[i];
+            var sprite = Oam.Span[i];
             var palette = (byte)((sprite.Attribute & 0x3) + 0x4);
             ushort offset = (ushort) (sprite.Id << 4);
 

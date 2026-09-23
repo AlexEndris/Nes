@@ -1,7 +1,6 @@
 ﻿// ReSharper disable once CheckNamespace
 
 using System;
-using System.Windows.Forms;
 
 namespace Hardware;
 

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Mime;
-using System.Text;
+
 using Hardware;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using static System.Double;
 
 namespace UI
 {
@@ -75,8 +71,8 @@ namespace UI
             cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes"); // NRom
             //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
             
-            //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
-            cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
+            cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
+            //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
 
             //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1

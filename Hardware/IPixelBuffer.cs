@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-namespace Hardware;
+﻿namespace Hardware;
 
 public interface IPixelBuffer
 {

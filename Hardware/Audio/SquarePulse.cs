@@ -1,6 +1,4 @@
-﻿using static System.Math;
-
-namespace Hardware.Audio;
+﻿namespace Hardware.Audio;
 
 public class SquarePulse
 {

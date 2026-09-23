@@ -2,8 +2,6 @@
 
 namespace Hardware;
 
-using System.Linq;
-
 public class CpuBus : IBus
 {
     public Cartridge Cartridge { get; private set; }

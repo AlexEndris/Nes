@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
+
 using Hardware.Audio;
 using Hardware.Audio.Filters;
-using SharpDX.Direct2D1;
-using SharpDX.Direct2D1.Effects;
-using static System.Math;
+
 using Triangle = Hardware.Audio.Triangle;
 
 namespace Hardware;
@@ -114,28 +111,24 @@ public class Apu
                 bool irqEnabled = (value & 0x80) > 0;
                 Dmc.IrqEnabled = irqEnabled;
                 Dmc.Irq = Dmc.Irq && irqEnabled; 
-                
-                bool loopEnabled = (value & 0x40) > 0;
-                byte rateIndex = (byte)(value & 0x0F);
-                
-                // TODO: set these on DMC
-                
+                Dmc.Loop = (value & 0x40) > 0;
+                Dmc.SetRate((byte)(value & 0x0F));
                 break;
             case 0x4011:
-                byte outputLevel = (byte)(value & 0x7F);
+                Dmc.OutputLevel = (byte)(value & 0x7F);
                 break;
             case 0x4012:
-                ushort sampleAddress = (ushort)((value << 6) | 0xC000);
+                Dmc.SampleAddress = (ushort)((value << 6) | 0xC000);
                 break;
             case 0x4013:
-                ushort sampleLength = (ushort)((value << 4) + 1);
+                Dmc.SampleLength = (ushort)((value << 4) + 1);
                 break;
             case 0x4015:
                 Pulse[0].Counter.Enabled = (value & 0x1) != 0;
                 Pulse[1].Counter.Enabled = (value & 0x2) != 0;
                 Triangle.Counter.Enabled = (value & 0x4) != 0;
                 Noise.Counter.Enabled = (value & 0x8) != 0;
-                Dmc.Enabled = (value & 0x10) != 0;
+                Dmc.SetState((value & 0x10) != 0);
                 Dmc.Irq = false;
                 break;
             case 0x4017:

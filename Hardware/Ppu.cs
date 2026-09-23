@@ -212,9 +212,17 @@ public class Ppu
         var (bgPixel, bgPalette) = RenderBackground();
         var (fgPixel, fgPalette, fgPriority, spriteZero) = RenderForeground();
 
+        if (cycle <= 8)
+        {
+            if (!ShowBackgroundLeft)
+                bgPixel = 0;
+            if (!ShowSpriteLeft)
+                fgPixel = 0;
+        }
+        
         var (pixel, palette) = ChoosePixel(bgPixel, fgPixel, fgPalette, bgPalette, fgPriority, spriteZero);
 
-        if (cycle is > 0 and < 256
+        if (cycle is > 0 and < 257
             && scanline is >= 0 and < 240)
         {
             var colour = GetColourFromPalette(palette, pixel);
@@ -243,9 +251,6 @@ public class Ppu
 
         if (bgPixel > 0 && fgPixel == 0)
             return (bgPixel, bgPalette);
-
-        if (bgPixel <= 0 || fgPixel <= 0) 
-            return (0, 0);
         
         if (!zeroSpriteHitPossible 
             || !spriteZero

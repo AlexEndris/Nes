@@ -13,7 +13,7 @@ public class LowPassIIR : IFilter
     public LowPassIIR(double sampleRate, double cutoff)
     {
         double dt = 1.0 / sampleRate;
-        double rc = 1.0 / (cutoff * 2 * PI);
+        double rc = 1.0 / (cutoff * Tau);
         Alpha = dt / (rc + dt);
     }
 

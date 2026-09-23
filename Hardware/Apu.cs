@@ -276,8 +276,8 @@ public class Apu
             return;
        
         sampleBuffer.Add(sample);
-        nextSampleAt = (uint) ((generatedSamples + 1) * ((float)cpuClock / sampleRate));
         generatedSamples++;
+        nextSampleAt = (uint) (generatedSamples * ((float)cpuClock / sampleRate));
     }
 
     private readonly List<double> sampleBuffer;

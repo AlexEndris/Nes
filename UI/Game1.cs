@@ -27,7 +27,7 @@ namespace UI
         private Texture2D palette2;
         private Texture2D palette3;
         private Texture2D palette4;
-        private TimeSpan _timePerFrame;
+        private TimeSpan timePerFrame;
 
         public Game1()
         {
@@ -67,16 +67,17 @@ namespace UI
             _font = Content.Load<SpriteFont>("fonts/Cascadia");
 
             Cartridge cart;
-            cart = Loader.LoadFromFile(@"..\..\..\mario.nes"); // NRom
-            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes"); // NRom
-            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes"); // NRom 
+            cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
+            cart = Loader.LoadFromFile(@"..\..\..\AccuracyCoin.nes");
+            //cart = Loader.LoadFromFile(@"..\..\..\donkey.nes");
             
             //cart = Loader.LoadFromFile(@"..\..\..\contra.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
-
-            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            
+            //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
+            cart = Loader.LoadFromFile(@"..\..\..\megaman2.nes"); // MMC1
             
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
@@ -160,11 +161,11 @@ namespace UI
             nesScreen.SetData(nes.Pixels);
             
             var end = DateTime.Now;
-            _timePerFrame = (end - start);
-            _framesPerSecond = 1.0 / _timePerFrame.TotalSeconds;
-            var frameTime = _timePerFrame.TotalMilliseconds;
+            timePerFrame = (end - start);
+            _framesPerSecond = 1.0 / timePerFrame.TotalSeconds;
+            var frameTime = timePerFrame.TotalMilliseconds;
             
-            UpdateDebug();
+            //UpdateDebug();
             
             previousState = Keyboard.GetState();
             advanceScanline = false;
@@ -264,6 +265,7 @@ namespace UI
 
         private void UpdateInput()
         {
+            nes.Controllers[0] = 0x0;
             var keyboardState = Keyboard.GetState();
             nes.Controllers[0] = 0x0;
             nes.Controllers[0] |= (byte)(keyboardState.IsKeyDown(Keys.A) ? 0x80 : 0x0);
@@ -274,6 +276,16 @@ namespace UI
             nes.Controllers[0] |= (byte)(keyboardState.IsKeyDown(Keys.Down) ? 0x04 : 0x0);
             nes.Controllers[0] |= (byte)(keyboardState.IsKeyDown(Keys.Left) ? 0x02 : 0x0);
             nes.Controllers[0] |= (byte)(keyboardState.IsKeyDown(Keys.Right) ? 0x01 : 0x0);
+            
+            var gamepad = GamePad.GetState(0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.A) ? 0x80 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.X) ? 0x40 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.Back) ? 0x20 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.Start) ? 0x10 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.DPadUp) ? 0x08 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.DPadDown) ? 0x04 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.DPadLeft) ? 0x02 : 0x0);
+            nes.Controllers[0] |= (byte)(gamepad.IsButtonDown(Buttons.DPadRight) ? 0x01 : 0x0);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -354,7 +366,7 @@ namespace UI
             _spriteBatch.DrawString(_font, $"Stack: ${nes.Cpu.SP:X2} [{nes.Cpu.SP}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"NES Frame Time: {_timePerFrame.TotalMilliseconds:00.0}ms -- FPS: {_framesPerSecond:000}fps", new Vector2(screenOffsetX, offsetY),
+            _spriteBatch.DrawString(_font, $"NES Frame Time: {timePerFrame.TotalMilliseconds:00.0}ms -- FPS: {_framesPerSecond:000}fps", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
             _spriteBatch.DrawString(_font, $"Cycles: CPU: {nes.Cpu.CycleCount,-13:N0}-- PPU: {nes.Ppu.CycleCount:N0}", new Vector2(screenOffsetX, offsetY),

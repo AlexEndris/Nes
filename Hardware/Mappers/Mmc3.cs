@@ -12,6 +12,7 @@ public class Mmc3 : AbstractMapper
     {
     }
 
+    // TODO: Needs to either be from the register or if not null from the header
     public override Mirroring Mirroring { get; }
 
     private byte bankSelectRegister;

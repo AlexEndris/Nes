@@ -4,10 +4,10 @@ Some dabbling with C# and an NES Emulator
 The solution is set up with two projects. One for the main emulation code, the other mainly for displaying something on the screen using MonoGame
 
 ## Next Steps
-MMC3 Mapper
+No Idea. About 70% of commercial games should run. Maybe make a proper window host to load the roms?
 
 ## Known Bugs
-(At least) In SMB there are some graphical bugs just after the header area of the screen sometimes, and (I think) some issues with sprite overflow. I haven't debugged any of that yet
+Some little flicker from IRQ timing in MMC3 games.
 
 ## Accuracy
 100thCoin provided a nice ROM to check the accuracy here on Github [100thCoin/AccuracyCoin](https://github.com/100thCoin/AccuracyCoin)

@@ -1,5 +1,6 @@
 ﻿namespace Hardware.Mappers;
 
+using System;
 using System.Diagnostics;
 
 using Headers;
@@ -16,7 +17,16 @@ public class Mmc3 : AbstractMapper
     public byte PrgBanks8k => (byte)(PrgBanks * 2);
     
     // TODO: If bit 6 of Flags 6 in mapper is set this should be four screen mirroring
-    public override Mirroring Mirroring { get; }
+    public override Mirroring Mirroring => mirroringRegister switch
+    {
+        0 => Mirroring.Horizontal,
+        1 => Mirroring.Vertical,
+        _ => throw new UnreachableException()
+    };
+
+    public override bool PrgRamEnabled => (ramProtectRegister & 0x80) > 0;
+
+    public override bool PrgRamWriteAllowed => (ramProtectRegister & 0x40) == 0;
 
     private byte bankSelectRegister;
     private byte[] bankRegisters = new byte[8];

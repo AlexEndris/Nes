@@ -50,7 +50,8 @@ public class Cartridge
         
         if (address is >= 0x6000 and <= 0x7FFF)
         {
-            if (!Mapper.PrgRamEnabled)
+            if (!Mapper.PrgRamEnabled
+                || !Mapper.PrgRamWriteAllowed)
                 return false;
 
             PrgRam.Span[(address & 0x1FFF)] = value;

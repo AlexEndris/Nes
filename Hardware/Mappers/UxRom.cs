@@ -44,7 +44,7 @@ public class UxRom : AbstractMapper
         return null;
     }
 
-    public override bool PpuRead(ushort address, out ushort mappedAddress)
+    public override bool PpuRead(ushort address, out int mappedAddress)
     {
         if (address <= 0x1FFF)
         {

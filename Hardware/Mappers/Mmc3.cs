@@ -12,7 +12,10 @@ public class Mmc3 : AbstractMapper
     {
     }
 
-    // TODO: Needs to either be from the register or if not null from the header
+    // PrgBanks counts in 16kb Size but MMC3 is 8kb
+    public byte PrgBanks8k => (byte)(PrgBanks * 2);
+    
+    // TODO: If bit 6 of Flags 6 in mapper is set this should be four screen mirroring
     public override Mirroring Mirroring { get; }
 
     private byte bankSelectRegister;
@@ -36,7 +39,39 @@ public class Mmc3 : AbstractMapper
 
     public override int? CpuRead(ushort address)
     {
-        throw new System.NotImplementedException();
+        if (address < 0x8000) 
+            return null;
+
+        // Last 8kb are always fixed
+        if (address >= 0xE000)
+            return (address & 0x1FFF) | ((PrgBanks - 1) << 13);
+
+        if (((bankSelectRegister >> 6) & 0x1) == 0)
+        {
+            switch (address)
+            {
+                case >=0x8000 and <0xA000:
+                    return (address & 0x1FFF) | ((bankRegisters[6]) << 13);
+                case >=0xA000 and <0xC000:
+                    return (address & 0x1FFF) | ((bankRegisters[7]) << 13);
+                case >=0xC000:
+                    return (address & 0x1FFF) | ((PrgBanks8k - 2) << 13);
+            }
+        }
+        else
+        {
+            switch (address)
+            {
+                case >=0x8000 and <0xA000:
+                    return (address & 0x1FFF) | ((PrgBanks8k - 2) << 13);
+                case >=0xA000 and <0xC000:
+                    return (address & 0x1FFF) | ((bankRegisters[7]) << 13);
+                case >=0xC000:
+                    return (address & 0x1FFF) | ((bankRegisters[6]) << 13);
+            }
+        }
+
+        throw new UnreachableException();
     }
 
     public override int? CpuWrite(ushort address, byte data)
@@ -100,13 +135,73 @@ public class Mmc3 : AbstractMapper
         };
     }
 
-    public override bool PpuRead(ushort address, out ushort mappedAddress)
+    public override bool PpuRead(ushort address, out int mappedAddress)
     {
-        throw new System.NotImplementedException();
+        mappedAddress = 0;
+        if (address >= 0x2000)
+            return false;
+
+        if (((bankSelectRegister >> 7) & 0x1) == 0)
+        {
+            switch (address)
+            {
+                case <0x0800:
+                    mappedAddress = ((address & 0x7FF) | (bankRegisters[0] << 10));
+                    break;
+                case <0x1000:
+                    mappedAddress = ((address & 0x7FF)| (bankRegisters[1] << 10));
+                    break;
+                case <0x1400:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[2] << 10));
+                    break;
+                case <0x1800:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[3] << 10));
+                    break;
+                case <0x1C00:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[4] << 10));
+                    break;
+                case <0x2000:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[5] << 10));
+                    break;
+            }
+        }
+        else
+        {
+            switch (address)
+            {
+                case <0x0400:
+                    mappedAddress = ((address & 0x3FF) | (bankRegisters[2] << 10));
+                    break;
+                case <0x0800:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[3] << 10));
+                    break;
+                case <0x0C00:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[4] << 10));
+                    break;
+                case <0x1000:
+                    mappedAddress = ((address & 0x3FF)| (bankRegisters[5] << 10));
+                    break;
+                case <0x1800:
+                    mappedAddress = ((address & 0x7FF)| (bankRegisters[0] << 10));
+                    break;
+                case <0x2000:
+                    mappedAddress = ((address & 0x7FF)| (bankRegisters[1] << 10));
+                    break;
+            }
+        }
+        
+        return true;
     }
 
     public override bool PpuWrite(ushort address, out ushort mappedAddress)
     {
-        throw new System.NotImplementedException();
+        if (address <= 0x1FFF && ChrRamBanks > 0)
+        {
+            mappedAddress = address;
+            return true;
+        }
+
+        mappedAddress = 0;
+        return false;
     }
 }

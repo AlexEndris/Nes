@@ -134,7 +134,7 @@ public class Mmc1 : AbstractMapper
         ShiftRegister = 0x10;
     }
 
-    public override bool PpuRead(ushort address, out ushort mappedAddress)
+    public override bool PpuRead(ushort address, out int mappedAddress)
     {
         mappedAddress = 0;
         if (address >= 0x2000)

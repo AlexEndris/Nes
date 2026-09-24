@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Hardware.Headers;
 
-
 namespace Hardware;
 
 public class Loader
@@ -63,9 +62,10 @@ public class Loader
     private static IMapper CreateMapper(ushort id, Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
     {
         var mappers = typeof(IMapper).Assembly.GetTypes()
-            .Where(t => typeof(IMapper).IsAssignableFrom(t) && !t.IsInterface);
+            .Where(t => typeof(IMapper).IsAssignableFrom(t) && !t.IsInterface)
+            .Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(MapperIdAttribute)));
 
-        var mapper = mappers.Single(t => t.GetCustomAttribute<MapperIdAttribute>().MapperId == id);
+        var mapper = mappers.Single(t => t.GetCustomAttribute<MapperIdAttribute>()!.MapperId == id);
 
         return (IMapper) Activator.CreateInstance(mapper, mirroring, prgBanks, chrBanks, prgRamBanks, chrRamBanks);
     }

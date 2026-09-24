@@ -106,9 +106,9 @@ namespace UI
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
             
-            //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
-            cart = Loader.LoadFromFile(@"..\..\..\megaman2.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\megaman2.nes"); // MMC1
             
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();
@@ -169,8 +169,7 @@ namespace UI
         protected override void Update(GameTime gameTime)
         {
             currentState = Keyboard.GetState();
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                currentState.IsKeyDown(Keys.Escape))
+            if (currentState.IsKeyDown(Keys.Escape))
                 Exit();
 
             this.gameTime = gameTime;

@@ -1,20 +1,13 @@
 ﻿namespace Hardware.Mappers;
 
-using System;
 using System.Diagnostics;
-using System.Windows.Forms;
 
 using Headers;
 
 [MapperId(1)]
-public class Mmc1 : IMapper
+public class Mmc1 : AbstractMapper
 {
-    public ushort PrgBanks { get; }
-    public ushort ChrBanks { get; }
-    public ushort PrgRamBanks { get; }
-    public ushort ChrRamBanks { get; }
-
-    public Mirroring Mirroring
+    public override Mirroring Mirroring
     {
         get
         {
@@ -34,7 +27,7 @@ public class Mmc1 : IMapper
         }
     }
 
-    public bool PrgRamEnabled => (PrgBankRegister & 0x10) == 0;   
+    public override bool PrgRamEnabled => (PrgBankRegister & 0x10) == 0;   
 
     private byte ControlRegister { get; set; }
     private byte ChrBank0Register { get; set; }
@@ -43,28 +36,25 @@ public class Mmc1 : IMapper
     
     private byte ShiftRegister { get; set; }
 
-    public Mmc1(Mirroring mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
+    public Mmc1(Mirroring? mirroring, ushort prgBanks, ushort chrBanks, ushort prgRamBanks, ushort chrRamBanks)
+        : base(mirroring, prgBanks, chrBanks, prgRamBanks, chrRamBanks)
     {
-        PrgBanks = prgBanks;
-        ChrBanks = chrBanks;
-        PrgRamBanks = prgRamBanks;
-        ChrRamBanks = chrRamBanks;
-        
+       
         ControlRegister = 0xC;
         ResetShiftRegister();
     }
 
-    public bool IsCpuRead(ushort address)
+    public override bool IsCpuRead(ushort address)
     {
         return address >= 0x6000;
     }
 
-    public bool IsCpuWrite(ushort address)
+    public override bool IsCpuWrite(ushort address)
     {
         return address >= 0x6000;
     }
 
-    public int? CpuRead(ushort address)
+    public override int? CpuRead(ushort address)
     {
         if (address < 0x8000) 
             return null;
@@ -93,7 +83,7 @@ public class Mmc1 : IMapper
         }
     }
 
-    public int? CpuWrite(ushort address, byte data)
+    public override int? CpuWrite(ushort address, byte data)
     {
         if (address < 0x8000)
             return null;
@@ -144,7 +134,7 @@ public class Mmc1 : IMapper
         ShiftRegister = 0x10;
     }
 
-    public bool PpuRead(ushort address, out ushort mappedAddress)
+    public override bool PpuRead(ushort address, out ushort mappedAddress)
     {
         mappedAddress = 0;
         if (address >= 0x2000)
@@ -172,7 +162,7 @@ public class Mmc1 : IMapper
         return true;
     }
 
-    public bool PpuWrite(ushort address, out ushort mappedAddress)
+    public override bool PpuWrite(ushort address, out ushort mappedAddress)
     {
         if (address <= 0x1FFF && ChrRamBanks > 0)
         {

@@ -178,12 +178,12 @@ public class Ppu
 
     private short scanline = -1;
     private ushort cycle = 0;
-    private uint cycleCount = 0;
-    private uint frameCount = 0;
+    private ulong cycleCount = 0;
+    private ulong frameCount = 0;
     public short Scanline => scanline;
     public ushort Cycle => cycle;
-    public uint CycleCount => cycleCount;
-    public uint FrameCount => frameCount;
+    public ulong CycleCount => cycleCount;
+    public ulong FrameCount => frameCount;
     
     
     private byte spriteCount = 0;
@@ -280,30 +280,44 @@ public class Ppu
 
     private void SpriteFetching()
     {
-        if (cycle is not 340)
+        if (!ShowBackground && !ShowSprite)
             return;
 
-        for (int i = 0; i < Math.Min(spriteCount, (byte)8); i++)
+        // Hardware fetches one sprite every 8 dots: 260, 268, ... 316.
+        if (cycle is < 260 or > 316
+            || (cycle - 260) % 8 != 0)
+            return;
+
+        int i = (cycle - 260) / 8;
+        var sprite = sprites[i];
+        
+        ushort addressLow;
+
+        if (i < spriteCount)
         {
-            var sprite = sprites[i];
-            
-            ushort addressLow = !control.SpriteSize
+            addressLow = !control.SpriteSize
                 ? GetSpriteAddress8x8(sprite)
                 : GetSpriteAddress8x16(sprite);
-            ushort addressHigh = (ushort) (addressLow + 8);
-
-            byte spriteLow = Read(addressLow);
-            byte spriteHigh = Read(addressHigh);
-
-            if (sprite.FlipHorizontal)
-            {
-                spriteLow = spriteLow.Reverse();
-                spriteHigh = spriteHigh.Reverse();
-            }
-
-            spritePixelLow[i] = spriteLow;
-            spritePixelHigh[i] = spriteHigh;
         }
+        else
+        {
+            addressLow = control.SpriteSize
+                ? (ushort)(0x1000 | (0xFE << 4)) // 8x16: tile $FF → table 1, index $FE
+                : (ushort)((control.SpriteTableBase << 12) | (0xFF << 4));
+        }
+        ushort addressHigh = (ushort) (addressLow + 8);
+
+        byte spriteLow = Read(addressLow);
+        byte spriteHigh = Read(addressHigh);
+
+        if (sprite.FlipHorizontal)
+        {
+            spriteLow = spriteLow.Reverse();
+            spriteHigh = spriteHigh.Reverse();
+        }
+
+        spritePixelLow[i] = spriteLow;
+        spritePixelHigh[i] = spriteHigh;
     }
 
     private ushort GetSpriteAddress8x16(ObjectAttributeEntry sprite)

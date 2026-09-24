@@ -6,4 +6,5 @@ public enum Mirroring
     Vertical = 1,
     OneScreenA = 2,
     OneScreenB = 3,
+    FourScreen = 4,
 }

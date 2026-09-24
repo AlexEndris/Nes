@@ -19,7 +19,7 @@ public struct LogLine
     public byte Y;
     public ushort SP;
     public AddressMode Mode;
-    public uint Cycle;
+    public ulong Cycle;
 }
 // ReSharper enable NotAccessedField.Global
 
@@ -54,7 +54,7 @@ public static class Logger
         }
     }
 
-    public static void StartLine(uint cycle)
+    public static void StartLine(ulong cycle)
     {
         if (!enabled)
             return;

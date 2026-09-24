@@ -8,11 +8,11 @@ using Microsoft.Xna.Framework.Input;
 
 namespace UI
 {
-    public class Game1 : Game
+    public class Emulator : Game
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
-        private SpriteFont _font;
+        private readonly GraphicsDeviceManager graphics;
+        private SpriteBatch spriteBatch;
+        private SpriteFont font;
         private Nes nes;
 
         private DynamicSoundEffectInstance sound;
@@ -29,26 +29,46 @@ namespace UI
         private Texture2D palette4;
         private TimeSpan timePerFrame;
 
-        public Game1()
+        public Emulator()
         {
-            _graphics = new GraphicsDeviceManager(this);
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferHeight = 1080;
-            //IsFixedTimeStep = false;
+            graphics = new GraphicsDeviceManager(this);
             TargetElapsedTime = TimeSpan.FromTicks((long) (TimeSpan.TicksPerSecond / 60.0988118623484));
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsDebugEnabled = false;
         }
+
+        public bool IsDebugEnabled { get; set; }
 
         protected override void Initialize()
         {
             nes = new Nes();
 
             gameTime = new GameTime();
+
+            InitializeSound();
+            InitializeTextures();
+            InitialiseWindow();
             
-            sound = new DynamicSoundEffectInstance(48000, AudioChannels.Mono);
-            //sound.BufferNeeded += SoundOnBufferNeeded;
-            //sound.Play();
+            base.Initialize();
+        }
+
+        private void InitialiseWindow()
+        {
+            if (!IsDebugEnabled)
+            {
+                graphics.PreferredBackBufferWidth = Nes.Width * 4;
+                graphics.PreferredBackBufferHeight = Nes.Height * 4;
+                graphics.ApplyChanges();
+                return;
+            }
+            
+            graphics.PreferredBackBufferWidth = 1807;
+            graphics.PreferredBackBufferHeight = 960;
+            graphics.ApplyChanges();
+        }
+
+        private void InitializeTextures()
+        {
 
             nesScreen = new Texture2D(GraphicsDevice, Nes.Width, Nes.Height);
             pattern1 = new Texture2D(GraphicsDevice, 256, 256);
@@ -58,13 +78,24 @@ namespace UI
             palette2 = new Texture2D(GraphicsDevice, 4, 1);
             palette3 = new Texture2D(GraphicsDevice, 4, 1);
             palette4 = new Texture2D(GraphicsDevice, 4, 1);
-            base.Initialize();
+        }
+
+        private void InitializeSound()
+        {
+            try
+            {
+                sound = new DynamicSoundEffectInstance(48000, AudioChannels.Mono);
+            }
+            catch (Exception e)
+            {
+                sound = null;
+            }
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _font = Content.Load<SpriteFont>("fonts/Cascadia");
+            spriteBatch = new SpriteBatch(GraphicsDevice);
+            font = Content.Load<SpriteFont>("fonts/Cascadia");
 
             Cartridge cart;
             cart = Loader.LoadFromFile(@"..\..\..\mario.nes");
@@ -144,13 +175,7 @@ namespace UI
 
             this.gameTime = gameTime;
 
-            if (nes.Apu.HasSamples())
-            {
-                SubmitBuffer();
-                if (sound.State != SoundState.Playing)
-                    sound.Play();
-            }
-
+            UpdateSound();
             EmulationInput();
             UpdateInput();
             
@@ -165,13 +190,26 @@ namespace UI
             _framesPerSecond = 1.0 / timePerFrame.TotalSeconds;
             var frameTime = timePerFrame.TotalMilliseconds;
             
-            //UpdateDebug();
+            UpdateDebug();
             
             previousState = Keyboard.GetState();
             advanceScanline = false;
             advanceFrame = false;
             advanceCycle = false;
             base.Update(gameTime);
+        }
+
+        private void UpdateSound()
+        {
+            if (sound is null)
+                return;
+
+            if (nes.Apu.HasSamples())
+            {
+                SubmitBuffer();
+                if (sound.State != SoundState.Playing)
+                    sound.Play();
+            }
         }
 
         private void SubmitBuffer()
@@ -244,6 +282,9 @@ namespace UI
 
         private void UpdateDebug()
         {
+            if (!IsDebugEnabled)
+                return;
+            
             // update pattern
             var data = nes.Ppu.GetOamTable(0);
             oam1.SetData(data);
@@ -292,54 +333,56 @@ namespace UI
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
+            spriteBatch.Begin();
 
             // NES Screen
-            _spriteBatch.Draw(nesScreen, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 1);
+            spriteBatch.Draw(nesScreen, Vector2.Zero, null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 1);
             
             DrawDebug();
 
-            _spriteBatch.End();
+            spriteBatch.End();
             
             base.Draw(gameTime);
         }
 
         private void DrawDebug()
         {
+            if (!IsDebugEnabled)
+                return;
+            
             var offset=  DrawCpu();
             DrawText(offset);
-            //DrawTemp(offset);
             DrawPpu();
         }
 
         private void DrawText(int offsetY)
         {
             var screenOffsetX = nesScreen.Width * 4 + 5;
-            var textHeight = (int) _font.MeasureString("RAM").Y;
+            var textHeight = (int) font.MeasureString("RAM").Y;
             offsetY += textHeight;
 
-            _spriteBatch.DrawString(_font, $"Cycle: {nes.Ppu.Cycle,-3} -- Scanline: {nes.Ppu.Scanline,-3} -- Frames: {nes.Ppu.FrameCount:N0}",
+            spriteBatch.DrawString(font, $"Cycle: {nes.Ppu.Cycle,-3} -- Scanline: {nes.Ppu.Scanline,-3} -- Frames: {nes.Ppu.FrameCount:N0}",
                 new Vector2(screenOffsetX, offsetY), Color.White);            
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"Pause: {pause}",
+            spriteBatch.DrawString(font, $"Pause: {pause}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"VRAM: {nes.Ppu.VRam.Raw}",
+            spriteBatch.DrawString(font, $"VRAM: {nes.Ppu.VRam.Raw}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"NametableX: {nes.Ppu.VRam.NametableX} - NametableY: {nes.Ppu.VRam.NametableY}",
+            spriteBatch.DrawString(font, $"NametableX: {nes.Ppu.VRam.NametableX} - NametableY: {nes.Ppu.VRam.NametableY}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"CoarseX: {nes.Ppu.VRam.CoarseX}, FineX: {nes.Ppu.FineX} - CoarseY: {nes.Ppu.VRam.CoarseY}, FineY: {nes.Ppu.VRam.FineY}",
+            spriteBatch.DrawString(font, $"CoarseX: {nes.Ppu.VRam.CoarseX}, FineX: {nes.Ppu.FineX} - CoarseY: {nes.Ppu.VRam.CoarseY}, FineY: {nes.Ppu.VRam.FineY}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"TRAM: {nes.Ppu.TRam.Raw}",
+            spriteBatch.DrawString(font, $"TRAM: {nes.Ppu.TRam.Raw}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"NametableX: {nes.Ppu.TRam.NametableX} - NametableY: {nes.Ppu.TRam.NametableY}",
+            spriteBatch.DrawString(font, $"NametableX: {nes.Ppu.TRam.NametableX} - NametableY: {nes.Ppu.TRam.NametableY}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"CoarseX: {nes.Ppu.TRam.CoarseX}, FineX: -- - CoarseY: {nes.Ppu.TRam.CoarseY}, FineY: {nes.Ppu.TRam.FineY}",
+            spriteBatch.DrawString(font, $"CoarseX: {nes.Ppu.TRam.CoarseX}, FineX: -- - CoarseY: {nes.Ppu.TRam.CoarseY}, FineY: {nes.Ppu.TRam.FineY}",
                 new Vector2(screenOffsetX, offsetY), Color.White);
         }
 
@@ -347,29 +390,29 @@ namespace UI
         {
             var screenOffsetX = nesScreen.Width * 4 + 5;
             var offsetY = 0;
-            var textHeight = (int)_font.MeasureString("Status").Y;
+            var textHeight = (int)font.MeasureString("Status").Y;
             // Status
             DrawStatus(screenOffsetX, offsetY);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"PC: ${nes.Cpu.PC:X4}", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"PC: ${nes.Cpu.PC:X4}", new Vector2(screenOffsetX, offsetY),
                 Color.White);            
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"A: ${nes.Cpu.A:X2} [{nes.Cpu.A}]", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"A: ${nes.Cpu.A:X2} [{nes.Cpu.A}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"X: ${nes.Cpu.X:X2} [{nes.Cpu.X}]", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"X: ${nes.Cpu.X:X2} [{nes.Cpu.X}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"Y: ${nes.Cpu.Y:X2} [{nes.Cpu.Y}]", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"Y: ${nes.Cpu.Y:X2} [{nes.Cpu.Y}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"Stack: ${nes.Cpu.SP:X2} [{nes.Cpu.SP}]", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"Stack: ${nes.Cpu.SP:X2} [{nes.Cpu.SP}]", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"NES Frame Time: {timePerFrame.TotalMilliseconds:00.0}ms -- FPS: {_framesPerSecond:000}fps", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"NES Frame Time: {timePerFrame.TotalMilliseconds:00.0}ms -- FPS: {_framesPerSecond:000}fps", new Vector2(screenOffsetX, offsetY),
                 Color.White);
             offsetY += textHeight;
-            _spriteBatch.DrawString(_font, $"Cycles: CPU: {nes.Cpu.CycleCount,-13:N0}-- PPU: {nes.Ppu.CycleCount:N0}", new Vector2(screenOffsetX, offsetY),
+            spriteBatch.DrawString(font, $"Cycles: CPU: {nes.Cpu.CycleCount,-13:N0}-- PPU: {nes.Ppu.CycleCount:N0}", new Vector2(screenOffsetX, offsetY),
                 Color.White);
 
             return offsetY;
@@ -379,24 +422,24 @@ namespace UI
         {
             var status = nes.Cpu.Status;
             var offsetX = 0;
-            _spriteBatch.DrawString(_font, "Status: ", new Vector2(screenOffsetX, offsetY), Color.White);
-            offsetX += (int) _font.MeasureString("Status: ").X;
-            _spriteBatch.DrawString(_font, "N ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Negative)? Color.Green : Color.DarkRed);
-            var twoLetters = (int) _font.MeasureString("V ").X;
+            spriteBatch.DrawString(font, "Status: ", new Vector2(screenOffsetX, offsetY), Color.White);
+            offsetX += (int) font.MeasureString("Status: ").X;
+            spriteBatch.DrawString(font, "N ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Negative)? Color.Green : Color.DarkRed);
+            var twoLetters = (int) font.MeasureString("V ").X;
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "V ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Overflow)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "V ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Overflow)? Color.Green : Color.DarkRed);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "- ", new Vector2(screenOffsetX+offsetX, offsetY), Color.Gray);
+            spriteBatch.DrawString(font, "- ", new Vector2(screenOffsetX+offsetX, offsetY), Color.Gray);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "B ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.BreakCommand)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "B ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.BreakCommand)? Color.Green : Color.DarkRed);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "D ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.DecimalMode)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "D ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.DecimalMode)? Color.Green : Color.DarkRed);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "I ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.InterruptDisable)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "I ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.InterruptDisable)? Color.Green : Color.DarkRed);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "Z ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Zero)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "Z ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Zero)? Color.Green : Color.DarkRed);
             offsetX += twoLetters;
-            _spriteBatch.DrawString(_font, "C ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Carry)? Color.Green : Color.DarkRed);
+            spriteBatch.DrawString(font, "C ", new Vector2(screenOffsetX+offsetX, offsetY), status.IsSet(CpuFlags.Carry)? Color.Green : Color.DarkRed);
         }
 
         private void DrawPpu()
@@ -407,27 +450,27 @@ namespace UI
             var patternOffsetY = palette1.Height * 16 + 5;
 
             // Palette
-            _spriteBatch.Draw(palette1, new Vector2(screenOffsetX, screenOffsetY), null,
+            spriteBatch.Draw(palette1, new Vector2(screenOffsetX, screenOffsetY), null,
                 Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 1);
 
-            _spriteBatch.Draw(palette2, new Vector2(screenOffsetX + 1 * 4 * 16 + 24, screenOffsetY), null,
+            spriteBatch.Draw(palette2, new Vector2(screenOffsetX + 1 * 4 * 16 + 24, screenOffsetY), null,
                 Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 1);
 
-            _spriteBatch.Draw(palette3, new Vector2(screenOffsetX + 2 * 4 * 16 + 2 * 24, screenOffsetY), null,
+            spriteBatch.Draw(palette3, new Vector2(screenOffsetX + 2 * 4 * 16 + 2 * 24, screenOffsetY), null,
                 Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 1);
 
-            _spriteBatch.Draw(palette4, new Vector2(screenOffsetX + 3 * 4 * 16 + 3 * 24, screenOffsetY), null,
+            spriteBatch.Draw(palette4, new Vector2(screenOffsetX + 3 * 4 * 16 + 3 * 24, screenOffsetY), null,
                 Color.White, 0, Vector2.Zero, 16, SpriteEffects.None, 1);
 
 
             // PatternTable
-            _spriteBatch.Draw(pattern1, new Vector2(screenOffsetX, screenOffsetY + patternOffsetY), null,
+            spriteBatch.Draw(pattern1, new Vector2(screenOffsetX, screenOffsetY + patternOffsetY), null,
                 Color.White, 0, Vector2.Zero, 2, SpriteEffects.None, 1);
 
-            _spriteBatch.Draw(pattern2, new Vector2(screenOffsetX + patternOffsetX, screenOffsetY + patternOffsetY), null,
+            spriteBatch.Draw(pattern2, new Vector2(screenOffsetX + patternOffsetX, screenOffsetY + patternOffsetY), null,
                 Color.White, 0, Vector2.Zero, 2, SpriteEffects.None, 1);
             
-            _spriteBatch.Draw(oam1, new Vector2(screenOffsetX + patternOffsetX*2, screenOffsetY + patternOffsetY), null,
+            spriteBatch.Draw(oam1, new Vector2(screenOffsetX + patternOffsetX*2, screenOffsetY + patternOffsetY), null,
                 Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 1);
         }
     }

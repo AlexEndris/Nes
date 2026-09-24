@@ -101,7 +101,7 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
     
         if (systemClock % 3 == 0)
         {
-            HandleCPU();
+            HandleCpu();
             Apu.Clock();
         }
         
@@ -111,12 +111,13 @@ public class Nes : IResetable, IInsertable, IPixelBuffer
             Cpu.TriggerNonMaskableInterrupt();
         }
 
-        Cpu.SetInterruptState(Apu.Interrupt);
+        bool interrupt = Apu.Interrupt || (Cartridge?.Interrupt ?? false); 
+        Cpu.SetInterruptState(interrupt);
 
         systemClock++;
     }
 
-    private void HandleCPU()
+    private void HandleCpu()
     {
         if (!CpuBus.DmaTransfer)
         {

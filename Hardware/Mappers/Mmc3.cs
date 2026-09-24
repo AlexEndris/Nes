@@ -16,11 +16,11 @@ public class Mmc3 : AbstractMapper
     // PrgBanks counts in 16kb Size but MMC3 is 8kb
     public byte PrgBanks8k => (byte)(PrgBanks * 2);
     
-    // TODO: If bit 6 of Flags 6 in mapper is set this should be four screen mirroring
-    public override Mirroring Mirroring => mirroringRegister switch
+    // TODO: If bit 3 of Flags 6 in mapper is set this should be four screen mirroring
+    public override Mirroring Mirroring => (mirroringRegister & 0x1) switch
     {
-        0 => Mirroring.Horizontal,
-        1 => Mirroring.Vertical,
+        0 => Mirroring.Vertical,
+        1 => Mirroring.Horizontal,
         _ => throw new UnreachableException()
     };
 
@@ -28,15 +28,22 @@ public class Mmc3 : AbstractMapper
 
     public override bool PrgRamWriteAllowed => (ramProtectRegister & 0x40) == 0;
 
+    public override bool Interrupt => interrupt;
+    
+
     private byte bankSelectRegister;
     private byte[] bankRegisters = new byte[8];
     private byte mirroringRegister;
     private byte ramProtectRegister;
     private byte irqLatchRegister;
-    private byte irqReloadRegister;
-    private byte irqDisableRegister;
-    private byte irqEnableRegister;
+    private bool reloadIrqCounter;
+    private bool irqDisabled;
+    private bool irqEnabled;
+    private bool interrupt;
 
+    private bool previousA12;
+    private byte irqCounter;
+    
     public override bool IsCpuRead(ushort address)
     {
         return address >= 0x6000;
@@ -54,7 +61,7 @@ public class Mmc3 : AbstractMapper
 
         // Last 8kb are always fixed
         if (address >= 0xE000)
-            return (address & 0x1FFF) | ((PrgBanks - 1) << 13);
+            return (address & 0x1FFF) | ((PrgBanks8k - 1) << 13);
 
         if (((bankSelectRegister >> 6) & 0x1) == 0)
         {
@@ -104,7 +111,8 @@ public class Mmc3 : AbstractMapper
                     irqLatchRegister = data;
                     break;
                 case <= 0xFFFF:
-                    irqDisableRegister = data;
+                    interrupt = false;
+                    irqEnabled = false;
                     break;
             }
 
@@ -123,10 +131,10 @@ public class Mmc3 : AbstractMapper
                     ramProtectRegister = data;
                     break;
                 case <= 0xDFFF:
-                    irqDisableRegister = data;
+                    reloadIrqCounter = true;
                     break;
                 case <= 0xFFFF:
-                    irqEnableRegister = data;
+                    irqEnabled = true;
                     break;
             }
         }
@@ -151,6 +159,14 @@ public class Mmc3 : AbstractMapper
         if (address >= 0x2000)
             return false;
 
+        bool a12 = (address & 0x1000) > 0;
+
+        if (!previousA12 
+            && a12)
+            ClockIrq();
+        
+        previousA12 = a12;
+        
         if (((bankSelectRegister >> 7) & 0x1) == 0)
         {
             switch (address)
@@ -201,6 +217,26 @@ public class Mmc3 : AbstractMapper
         }
         
         return true;
+    }
+
+    private void ClockIrq()
+    {
+        if (reloadIrqCounter
+            || irqCounter == 0)
+        {
+            irqCounter = irqLatchRegister;
+            reloadIrqCounter = false;
+        }
+        else
+        {
+            irqCounter--;
+        }
+    
+        if (irqCounter == 0
+            && irqEnabled)
+        {
+            interrupt = true;
+        }
     }
 
     public override bool PpuWrite(ushort address, out ushort mappedAddress)

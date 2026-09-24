@@ -75,10 +75,10 @@ public partial class Cpu
     }
 
     public byte Cycles { get; private set; }
-    public uint CycleCount => cycleCount;
+    public ulong CycleCount => cycleCount;
     
     private Dictionary<byte, (string Name, AddressMode Mode, byte Cycles, Func<Func<ushort>, ushort, byte> Func)> opcodeActions;
-    private uint cycleCount;
+    private ulong cycleCount;
     
     
     public Cpu(IBus bus)

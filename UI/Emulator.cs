@@ -34,7 +34,7 @@ namespace UI
             graphics = new GraphicsDeviceManager(this);
             TargetElapsedTime = TimeSpan.FromTicks((long) (TimeSpan.TicksPerSecond / 60.0988118623484));
             Content.RootDirectory = "Content";
-            IsDebugEnabled = false;
+            IsDebugEnabled = true;
         }
 
         public bool IsDebugEnabled { get; set; }
@@ -106,9 +106,12 @@ namespace UI
             //cart = Loader.LoadFromFile(@"..\..\..\megaman.nes"); // UxROM
             //cart = Loader.LoadFromFile(@"..\..\..\castlevania.nes"); // UxROM
             
-            cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
+            //cart = Loader.LoadFromFile(@"..\..\..\metroid.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\icarus.nes"); // MMC1
             //cart = Loader.LoadFromFile(@"..\..\..\megaman2.nes"); // MMC1
+            
+            //cart = Loader.LoadFromFile(@"..\..\..\mario3.nes"); // MMC3
+            //cart = Loader.LoadFromFile(@"..\..\..\megaman3.nes"); // MMC3
             
             //cart = CpuTestRoms();
             //cart = PpuTestRoms();

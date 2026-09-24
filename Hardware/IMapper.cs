@@ -13,6 +13,7 @@ public interface IMapper
     public Mirroring Mirroring { get; }
     public bool PrgRamEnabled { get; }
     public bool PrgRamWriteAllowed { get; }
+    public bool Interrupt { get; }
     public bool IsCpuRead(ushort address);
     public bool IsCpuWrite(ushort address);
     public int? CpuRead(ushort address);
@@ -45,6 +46,8 @@ public abstract class AbstractMapper : IMapper
     public virtual bool PrgRamEnabled { get; } = false;
 
     public virtual bool PrgRamWriteAllowed { get; } = true;
+
+    public virtual bool Interrupt { get; } = false;
 
     public abstract bool IsCpuRead(ushort address);
 

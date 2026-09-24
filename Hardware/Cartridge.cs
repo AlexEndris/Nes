@@ -8,6 +8,8 @@ public class Cartridge
     public Memory<byte> PrgRom { get; }
     public Memory<byte> ChrRom { get; }
     public Memory<byte> PrgRam { get; }
+
+    public bool Interrupt => Mapper.Interrupt;
     
     public Cartridge(IMapper mapper, byte[] prgMem, byte[] chrMem, byte[] prgRam)
     {
